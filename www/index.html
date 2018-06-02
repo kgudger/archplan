@@ -25,24 +25,74 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
     * Create your own at http://cspisawesome.com
     -->
     <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: 'unsafe-inline' https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; media-src *" /> -->
-
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <meta content="Webflow" name="generator">
+  <link href="css/normalize.css" rel="stylesheet" type="text/css">
+  <link href="css/webflow.css" rel="stylesheet" type="text/css">
+  <link href="css/taras-dandy-project-02e7c7.webflow.css" rel="stylesheet" type="text/css">
+  <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js" type="text/javascript"></script>
+  <script type="text/javascript">WebFont.load({  google: {    families: ["Varela Round:400","Inconsolata:400,700","Lemon:regular"]  }});</script>
+  <!-- [if lt IE 9]><script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js" type="text/javascript"></script><![endif] -->
+  <script type="text/javascript">!function(o,c){var n=c.documentElement,t=" w-mod-";n.className+=t+"js",("ontouchstart"in o||o.DocumentTouch&&c instanceof DocumentTouch)&&(n.className+=t+"touch")}(window,document);</script>
+  <link href="https://daks2k3a4ib2z.cloudfront.net/img/webclip.png" rel="apple-touch-icon">
     <link rel="stylesheet" type="text/css" href="css/index.css" />
-    <title>Architectual Planning App</title>
+    <title>FeasiBuild</title>
 	<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false&key=AIzaSyBL_Mp0VJY5mOM1uGc-jT41FCN2z3XP5Z0"></script>
 </head>
 
 <body onload="initialize_map()">
-    <div class="app">
-        <h1>Enter Your Address</h1>
-        <div id="deviceready" class="blink">
-			<label for "address">
-            <input type=text class="right50" id="address" placeholder="your address" onblur="fillName(this.id);">
-            <a href="#" class="blue_sub" onclick="sendData()">Submit</a>
-            </label>
-
+  <div class="header-section">
+    <div class="container w-container">
+      <h1 class="heading">feasIbuild</h1>
+      <p class="subtitle">first step to your dream home</p>
+      <div class="sign-up-form w-form">
+			<input type="text" class="field w-input" maxlength="256" name="address" data-name="address" placeholder="Enter your address" id="address" required="">
+			</input>
+			<input type="submit" value="Go" data-wait="Please wait..." class="button w-button" onclick="sendfunc()">
+			<select id="city" name="city" data-name="city" required="" class="select-field w-select"><option value="City of Santa Cruz">City of Santa Cruz</option><option value="County of Santa Cruz">County of Santa Cruz</option><option value="City of Capitola">City of Capitola</option><option value="City of Watsonville">City of Watsonville</option><option value="City of Scotts Valley">City of Scotts Valley</option>
+			</select>
         </div>
+        <div class="error-message w-form-fail">
+          <p>Oops! Something went wrong while submitting the form. :(</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js" type="text/javascript" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+  <script src="js/webflow.js" type="text/javascript"></script>
+  <div class="w-row">
+    <div class="w-col w-col-6">
+      <div  id="map_canvas" data-widget-style="satellite" class="map w-widget w-widget-map">
+      </div>
+    </div>
+    <div class="w-col w-col-6">
+      <div>
+        <div class="rich-text-block w-richtext">
+          <h2 id="add_place">Address</h2>
+          <p>APN</p>
+          <ul>
+            <li id="apn_place"></li>
+          </ul>
+          <p>Zoning </p>
+          <ul>
+            <li id="zone_place"></li>
+          </ul>
+          <p>Property Lines</p>
+          <ul>
+            <li id="prop_place"></li>
+          </ul>
+          <p>Lot Size</p>
+          <ul>
+            <li id="lot_place"></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- [if lte IE 9]><script src="https://cdnjs.cloudflare.com/ajax/libs/placeholders/3.0.2/placeholders.min.js"></script><![endif] -->
+    <div >
 		<div style="width:100%;" id="map_cont"  style="background-color: #fff3a1;">
-			<div id="map_canvas" >
+			<div >
 			</div>
 		</div> <!-- map_cont -->
     </div>

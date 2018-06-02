@@ -9,6 +9,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 var currentLatitude = 36.9741;
 var currentLongitude = -122.0308
+var geocoder;
+var mapCanvas = document.getElementById('map_canvas');
+var _map ;
 
 console.log("In app.js");
 
@@ -16,16 +19,15 @@ console.log("In app.js");
 		console.log("In initalize");
 //		directionsService = new google.maps.DirectionsService();
 		latlngp = new google.maps.LatLng(currentLatitude, currentLongitude); // using global variable now
-        var mapCanvas = document.getElementById('map_canvas');
 	    var mapOptions = {
 			center: latlngp,
 			zoomControl: true,
 	        zoomControlOptions: {
-	            style: google.maps.ZoomControlStyle.SMALL,
+//	            style: google.maps.ZoomControlStyle.SMALL,
 //	          position: google.maps.ControlPosition.LEFT_TOP
 		    },
-    	    zoom: 16,
-    	    mapTypeId: google.maps.MapTypeId.TERRAIN
+    	    zoom: 20,
+    	    mapTypeId: google.maps.MapTypeId.roadmap
     	};
         _map = new google.maps.Map(mapCanvas, mapOptions);
 //		setTimeout("$('#map_canvas').gmap('refresh')",500);
@@ -300,3 +302,86 @@ console.log("In app.js");
 	    console.log("Geolocation failed. \nPlease enable GPS in Settings.", 1);
 		document.getElementById("geostat").innerHTML="Geolocation failed. \nPlease enable GPS in Settings.";
 	};
+
+/**	updateMap
+ *	
+ *	@param latitude is farthest latitude from center
+ *	@param longitude is farthest longitude from center
+ *	@param color is color of polygon
+ *	@param cname is name of field
+ *	@param crop is crop type
+ */
+	function updateMap(features) {
+	  document.getElementById("add_place").innerHTML=features['Address'];
+	  document.getElementById("apn_place").innerHTML=features['APN'];
+	  document.getElementById("zone_place").innerHTML=features['Zoning1'];
+	  document.getElementById("lot_place").innerHTML=features['ParcelSizeSqFt']+ "Sq. Ft.";
+	  geocoder = new google.maps.Geocoder();
+      if (geocoder) {
+       geocoder.geocode( { 'address': features['Address']}, function(results, status) {
+        if (status == google.maps.GeocoderStatus.OK) {
+          if (status != google.maps.GeocoderStatus.ZERO_RESULTS) {
+			console.log("Geocode OK" + results[0].geometry.location);
+          _map.setCenter(results[0].geometry.location);
+
+            var infowindow = new google.maps.InfoWindow(
+                { content: features['Address'] + '<br>APN: ' 
+					+ features['APN'] + '<br>Sq Ft: ' + features['ParcelSizeSqFt']+'<br>Zoning: ' + features['Zoning1'] ,
+                  size: new google.maps.Size(150,50)
+                });
+
+            var marker = new google.maps.Marker({
+                position: results[0].geometry.location,
+                map: _map, 
+                title:features['Address']
+            }); 
+            google.maps.event.addListener(marker, 'click', function() {
+                infowindow.open(_map,marker);
+            });
+
+          } else {
+            alert("No results found");
+          }
+        } else {
+          alert("Geocode was not successful for the following reason: " + status);
+        }
+      });
+    }
+  }		
+
+/**
+ *	"Ajax" function that sends and processes xmlhttp request
+ *	@param params is GET request string
+ */
+function sendfunc() {
+    var xmlhttp;
+	var address = document.getElementById("address").value
+//	address += " Santa Cruz CA";
+	address = encodeURI(address);
+	console.log("Address is " + address);
+	try {
+	   xmlhttp=new XMLHttpRequest();
+    } catch(e) {
+        xmlhttp = false;
+        console.log(e);
+    }
+	if (xmlhttp) {
+        xmlhttp.onreadystatechange=function() {
+		  if (xmlhttp.readyState==4)
+		  {  if ( (xmlhttp.status==200) || (xmlhttp.status==0) )
+            {
+              returnedList = (xmlhttp.responseText);
+              returnedList = JSON.parse(returnedList);
+              var features = returnedList['features']['0']['attributes'];
+              console.log(features);
+              updateMap(features);
+			}
+		  }
+		};
+	}
+	xmlhttp.open("GET","https://vw8.cityofsantacruz.com/server/rest/services/search/MapServer/0/query?f=json&where=Upper(Address)%20LIKE%20Upper(%27%25" + address + "%25%27)&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=Address%2CSiteAdd2%2CAPN%2CUseCode%2CParcelSizeSqFt%2CCOASTALZ%2CZoning1&outSR=102643", true);
+	xmlhttp.send(null);
+/*      xmlhttp.setRequestHeader ("Accept", "text/plain");
+	  xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+      xmlhttp.send(params);*/
+}; // sendfunc

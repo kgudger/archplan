@@ -1,0 +1,22 @@
+https://vw8.cityofsantacruz.com/server/rest/services/search/MapServer/0/query?f=json&where=Upper(Address)%20LIKE%20Upper(%27%25325%25%27)%20AND%20Upper(Address)%20LIKE%20Upper(%27%25soquel%25%27)&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=Address%2CSiteAdd2%2CAPN%2CUseCode%2CParcelSizeSqFt%2CCOASTALZ%2CZoning1%2CZoning2%2CZoning3%2CZOCON%2CZOFP%2CZOHD%2CZOHIST%2CZOMS%2CZOMU%2CZOPER%2CZOSP%2CZOWC%2CGP1%2CGP2%2CGP3%2CGPBSOL%2CGPDRP%2CGPSCH%2CGPS%2CGPW%2CFLOODTYPE%2CLEVEE%2CPROJECT%2CSLOPE%2CFIRE%2CGWRECHARGE%2CRANGE%2CARCHSITE%2CARCHAREA%2CHISTARCH%2CVOLPAGE%2CNHISTORIC%2CHABITAT%2CMONARCH%2CSENSITIVE%2CBIA%2CDPD%2CBSOLTIF%2CCODETER%2CTARGETA%2CSBKEY%2CWCCAT%2CCSM%2CBIOTICRR%2CCBLOCK%2CTITLE%2CNAME%2CHLINK%2CAssessorSite%2CZillow%2COBJECTID&outSR=102643
+
+https://vw8.cityofsantacruz.com/server/rest/services/Planning/MapServer/export?dpi=96&transparent=true&format=png32&layers=show%3A-1&bbox=6082334.787986779%2C1815698.9319322172%2C6127272.287986779%2C1840886.4319322172&bboxSR=102643&imageSR=102643&size=719%2
+
+https://vw8.cityofsantacruz.com/server/rest/services/Data/MapServer/42/query?outFields=*&where=1%3D1
+
+https://vw8.cityofsantacruz.com/public/?esearch=325 soquel&slayer=0&exprnum=0
+
+https://opendata.arcgis.com/datasets/7e98689ccae44ac7a4bf9c963a349f07_1.geojson
+
+https://vw8.cityofsantacruz.com/server/rest/services/search/MapServer/0/
+query?f=json&where=Upper(Address)%20LIKE%20Upper(%27%25325%25%27)%20AND%20Upper(Address)%20LIKE%20Upper(%27%25soquel%25%27)
+&returnGeometry=true&spatialRel=esriSpatialRelIntersects
+&outFields=Address%2CSiteAdd2%2CAPN%2CUseCode%2CParcelSizeSqFt%2CCOASTALZ%2CZoning1
+%2CZoning2%2CZoning3%2CZOCON%2CZOFP%2CZOHD%2CZOHIST%2CZOMS%2CZOMU%2CZOPER%2CZOSP%2CZOWC%2CGP1%2CGP2%2CGP3%2CGPBSOL%2CGPDRP%2CGPSCH%2CGPS%2CGPW%2CFLOODTYPE%2CLEVEE%2CPROJECT%2CSLOPE%2CFIRE%2CGWRECHARGE%2CRANGE%2CARCHSITE%2CARCHAREA%2CHISTARCH%2CVOLPAGE%2CNHISTORIC%2CHABITAT%2CMONARCH%2CSENSITIVE%2CBIA%2CDPD%2CBSOLTIF%2CCODETER%2CTARGETA%2CSBKEY%2CWCCAT%2CCSM%2CBIOTICRR%2CCBLOCK%2CTITLE%2CNAME%2CHLINK%2CAssessorSite%2CZillow%2COBJECTID
+&outSR=102643
+
+https://vw8.cityofsantacruz.com/server/rest/services/search/MapServer/0/query?f=json&where=Upper(Address)%20LIKE%20Upper(%27%25325%20soquel%25%27)&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=Address%2CSiteAdd2%2CAPN%2CUseCode%2CParcelSizeSqFt%2CCOASTALZ%2CZoning1&outSR=102643
+
+Setbacks,
+height,
+lot coverage.
