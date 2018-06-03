@@ -8,22 +8,26 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
  */
 
 var currentLatitude = 36.9741;
-var currentLongitude = 122.0308
+var currentLongitude = -122.0308
+var geocoder;
+var mapCanvas = document.getElementById('map_canvas');
+var _map ;
+
+console.log("In app.js");
 
     function initialize_map() {
 		console.log("In initalize");
 //		directionsService = new google.maps.DirectionsService();
 		latlngp = new google.maps.LatLng(currentLatitude, currentLongitude); // using global variable now
-        var mapCanvas = document.getElementById('map_canvas');
 	    var mapOptions = {
 			center: latlngp,
 			zoomControl: true,
 	        zoomControlOptions: {
-	            style: google.maps.ZoomControlStyle.SMALL,
+//	            style: google.maps.ZoomControlStyle.SMALL,
 //	          position: google.maps.ControlPosition.LEFT_TOP
 		    },
-    	    zoom: 16,
-    	    mapTypeId: google.maps.MapTypeId.TERRAIN
+    	    zoom: 20,
+    	    mapTypeId: google.maps.MapTypeId.roadmap
     	};
         _map = new google.maps.Map(mapCanvas, mapOptions);
 //		setTimeout("$('#map_canvas').gmap('refresh')",500);
@@ -298,3 +302,201 @@ var currentLongitude = 122.0308
 	    console.log("Geolocation failed. \nPlease enable GPS in Settings.", 1);
 		document.getElementById("geostat").innerHTML="Geolocation failed. \nPlease enable GPS in Settings.";
 	};
+
+/**	updateMap
+ *	
+ *	@param latitude is farthest latitude from center
+ *	@param longitude is farthest longitude from center
+ *	@param color is color of polygon
+ *	@param cname is name of field
+ *	@param crop is crop type
+ */
+	function updateMap(features) {
+	  document.getElementById("add_place").innerHTML=features['Address'];
+	  document.getElementById("apn_place").innerHTML=features['APN'];
+	  document.getElementById("zone_place").innerHTML=features['Zoning1'];
+	  document.getElementById("lot_place").innerHTML=features['ParcelSizeSqFt']+ "Sq. Ft.";
+	  geocoder = new google.maps.Geocoder();
+      if (geocoder) {
+       geocoder.geocode( { 'address': features['Address']}, function(results, status) {
+        if (status == google.maps.GeocoderStatus.OK) {
+          if (status != google.maps.GeocoderStatus.ZERO_RESULTS) {
+			console.log("Geocode OK" + results[0].geometry.location);
+          _map.setCenter(results[0].geometry.location);
+
+            var infowindow = new google.maps.InfoWindow(
+                { content: "<a href='http://feasibuild.tk/images/129R.png'>Setbacks</a>" ,
+                  size: new google.maps.Size(150,50)
+                });
+
+            var marker = new google.maps.Marker({
+                position: results[0].geometry.location,
+                map: _map, 
+                title:features['Address']
+            }); 
+            google.maps.event.addListener(marker, 'click', function() {
+                infowindow.open(_map,marker);
+            });
+            var apnnd = features['APN']
+            apnnd = apnnd.replace(/-/g, '')
+ 			console.log("APN " + apnnd);
+            getPoly(apnnd)
+
+          } else {
+            alert("No results found");
+          }
+        } else {
+          alert("Geocode was not successful for the following reason: " + status);
+        }
+      });
+    }
+  }		
+
+/**	updatePoly
+ *	
+ *	@param latitude is farthest latitude from center
+ *	@param longitude is farthest longitude from center
+ *	@param color is color of polygon
+ *	@param cname is name of field
+ *	@param crop is crop type
+ */
+	function updatePoly(features) {
+		var fieldCoords = [];
+		var arrayLength = features.length;
+		for (var i = 0; i < arrayLength; i++) {
+			console.log("1=" + features[i][1] + " 0= " + features[i][0]);
+			fieldCoords.push(new google.maps.LatLng(features[i][1], features[i][0]));
+		}
+
+  // Construct the polygon.
+  		var cropField = new google.maps.Polygon({
+		    paths: fieldCoords,
+		   	strokeColor: 1,
+		    strokeOpacity: 0.8,
+		    strokeWeight: 2,
+		    fillColor: 1,
+		    fillOpacity: 0.0,
+		    draggable: false,
+		    editable: false,
+		    geodesic: true
+		});
+		cropField.setMap(_map);
+  }		
+
+
+/**
+ *	"Ajax" function that sends and processes xmlhttp request
+ *	@param params is GET request string
+ */
+function sendfunc() {
+    var xmlhttp;
+	var address = document.getElementById("address").value
+//	address += " Santa Cruz CA";
+	address = encodeURI(address);
+	console.log("Address is " + address);
+	try {
+	   xmlhttp=new XMLHttpRequest();
+    } catch(e) {
+        xmlhttp = false;
+        console.log(e);
+    }
+	if (xmlhttp) {
+        xmlhttp.onreadystatechange=function() {
+		  if (xmlhttp.readyState==4)
+		  {  if ( (xmlhttp.status==200) || (xmlhttp.status==0) )
+            {
+              returnedList = (xmlhttp.responseText);
+              returnedList = JSON.parse(returnedList);
+              var features = returnedList['features']['0']['attributes'];
+              console.log(features);
+              var zone = features['Zoning1'];
+              zone = zone.split(" ");
+              console.log("zone is " + zone[0]);
+              getZones(zone[0]);
+              updateMap(features);
+			}
+		  }
+		};
+	}
+	xmlhttp.open("GET","https://vw8.cityofsantacruz.com/server/rest/services/search/MapServer/0/query?f=json&where=Upper(Address)%20LIKE%20Upper(%27%25" + address + "%25%27)&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=Address%2CSiteAdd2%2CAPN%2CUseCode%2CParcelSizeSqFt%2CCOASTALZ%2CZoning1&outSR=102643", true);
+	xmlhttp.send(null);
+/*      xmlhttp.setRequestHeader ("Accept", "text/plain");
+	  xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+      xmlhttp.send(params);*/
+}; // sendfunc
+
+/**
+ *	"Ajax" function that sends and processes xmlhttp request
+ *	@param params is GET request string
+ */
+function getPoly(apn) {
+    var xmlhttp;
+	console.log("APN is " + apn);
+	try {
+	   xmlhttp=new XMLHttpRequest();
+    } catch(e) {
+        xmlhttp = false;
+        console.log(e);
+    }
+	if (xmlhttp) {
+        xmlhttp.onreadystatechange=function() {
+		  if (xmlhttp.readyState==4)
+		  {  if ( (xmlhttp.status==200) || (xmlhttp.status==0) )
+            {
+              returnedList = (xmlhttp.responseText);
+              returnedList = JSON.parse(returnedList);
+              var features = returnedList['features']['0']['geometry']['rings']['0'];
+              console.log(features);
+/*              var zone = features['Zoning1'];
+              zone = zone.split(" ");
+              console.log("zone is " + zone[0]);
+              getZones(zone[0]);*/
+              updatePoly(features);
+			}
+		  }
+		};
+	}
+	xmlhttp.open("GET","https://gis.co.santa-cruz.ca.us/sccgis/rest/services/OpenData_Build_Single/MapServer/145/query?where=APNNODASH%20%3D%20%27" + apn + "%27&outFields=GP_LANDUSE&outSR=4326&f=json", true);
+	xmlhttp.send(null);
+/*      xmlhttp.setRequestHeader ("Accept", "text/plain");
+	  xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+      xmlhttp.send(params);*/
+}; // getPoly
+
+/**
+ *	"Ajax" function that sends and processes xmlhttp request
+ *	@param params is GET request string
+ */
+function getZones(zone) {
+    var xmlhttp;
+	console.log("Zone is " + zone);
+	try {
+	   xmlhttp=new XMLHttpRequest();
+    } catch(e) {
+        xmlhttp = false;
+        console.log(e);
+    }
+	if (xmlhttp) {
+        xmlhttp.onreadystatechange=function() {
+		  if (xmlhttp.readyState==4)
+		  {  if ( (xmlhttp.status==200) || (xmlhttp.status==0) )
+            {
+              returnedList = (xmlhttp.responseText);
+              returnedList = JSON.parse(returnedList);
+              console.log(returnedList);
+              document.getElementById("fset_place").innerHTML=returnedList['sfront'];
+              document.getElementById("rset_place").innerHTML=returnedList['srear'];
+              document.getElementById("sset_place").innerHTML=returnedList['s1side'];
+			  document.getElementById("mbuild_place").innerHTML=returnedList['maxbuild'];
+			  document.getElementById("mheight_place").innerHTML=returnedList['pheight'];
+			  document.getElementById("mstories_place").innerHTML=returnedList['pstories'];
+			}
+		  }
+		};
+	}
+	xmlhttp.open("GET","http://feasibuild.tk/server.php?command=getZone&zone=" + zone, true);
+	xmlhttp.send(null);
+/*      xmlhttp.setRequestHeader ("Accept", "text/plain");
+	  xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+      xmlhttp.send(params);*/
+}; // getZones
