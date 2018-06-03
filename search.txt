@@ -20,3 +20,7 @@ https://vw8.cityofsantacruz.com/server/rest/services/search/MapServer/0/query?f=
 Setbacks,
 height,
 lot coverage.
+
+&where=APNNODASH%20%3D%20%2700326204%27
+
+https://gis.co.santa-cruz.ca.us/sccgis/rest/services/OpenData_Build_Single/MapServer/145/query?where=APNNODASH%20%3D%20%2700326204%27&outFields=GP_LANDUSE,GP_PUBFAC,GP_SPCOM,SHAPE,SHAPE.STArea(),ZONING,APN&outSR=4326&f=json

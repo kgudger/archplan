@@ -338,6 +338,10 @@ console.log("In app.js");
             google.maps.event.addListener(marker, 'click', function() {
                 infowindow.open(_map,marker);
             });
+            var apnnd = features['APN']
+            apnnd = apnnd.replace(/-/g, '')
+ 			console.log("APN " + apnnd);
+            getPoly(apnnd)
 
           } else {
             alert("No results found");
@@ -348,6 +352,38 @@ console.log("In app.js");
       });
     }
   }		
+
+/**	updatePoly
+ *	
+ *	@param latitude is farthest latitude from center
+ *	@param longitude is farthest longitude from center
+ *	@param color is color of polygon
+ *	@param cname is name of field
+ *	@param crop is crop type
+ */
+	function updatePoly(features) {
+		var fieldCoords = [];
+		var arrayLength = features.length;
+		for (var i = 0; i < arrayLength; i++) {
+			console.log("1=" + features[i][1] + " 0= " + features[i][0]);
+			fieldCoords.push(new google.maps.LatLng(features[i][1], features[i][0]));
+		}
+
+  // Construct the polygon.
+  		var cropField = new google.maps.Polygon({
+		    paths: fieldCoords,
+		   	strokeColor: 1,
+		    strokeOpacity: 0.8,
+		    strokeWeight: 2,
+		    fillColor: 1,
+		    fillOpacity: 0.0,
+		    draggable: false,
+		    editable: false,
+		    geodesic: true
+		});
+		cropField.setMap(_map);
+  }		
+
 
 /**
  *	"Ajax" function that sends and processes xmlhttp request
@@ -374,12 +410,91 @@ function sendfunc() {
               returnedList = JSON.parse(returnedList);
               var features = returnedList['features']['0']['attributes'];
               console.log(features);
+              var zone = features['Zoning1'];
+              zone = zone.split(" ");
+              console.log("zone is " + zone[0]);
               updateMap(features);
 			}
 		  }
 		};
 	}
 	xmlhttp.open("GET","https://vw8.cityofsantacruz.com/server/rest/services/search/MapServer/0/query?f=json&where=Upper(Address)%20LIKE%20Upper(%27%25" + address + "%25%27)&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=Address%2CSiteAdd2%2CAPN%2CUseCode%2CParcelSizeSqFt%2CCOASTALZ%2CZoning1&outSR=102643", true);
+	xmlhttp.send(null);
+/*      xmlhttp.setRequestHeader ("Accept", "text/plain");
+	  xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+      xmlhttp.send(params);*/
+}; // sendfunc
+
+/**
+ *	"Ajax" function that sends and processes xmlhttp request
+ *	@param params is GET request string
+ */
+function getPoly(apn) {
+    var xmlhttp;
+	console.log("APN is " + apn);
+	try {
+	   xmlhttp=new XMLHttpRequest();
+    } catch(e) {
+        xmlhttp = false;
+        console.log(e);
+    }
+	if (xmlhttp) {
+        xmlhttp.onreadystatechange=function() {
+		  if (xmlhttp.readyState==4)
+		  {  if ( (xmlhttp.status==200) || (xmlhttp.status==0) )
+            {
+              returnedList = (xmlhttp.responseText);
+              returnedList = JSON.parse(returnedList);
+              var features = returnedList['features']['0']['geometry']['rings']['0'];
+              console.log(features);
+/*              var zone = features['Zoning1'];
+              zone = zone.split(" ");
+              console.log("zone is " + zone[0]);
+              getZones(zone[0]);*/
+              updatePoly(features);
+			}
+		  }
+		};
+	}
+	xmlhttp.open("GET","https://gis.co.santa-cruz.ca.us/sccgis/rest/services/OpenData_Build_Single/MapServer/145/query?where=APNNODASH%20%3D%20%27" + apn + "%27&outFields=GP_LANDUSE&outSR=4326&f=json", true);
+	xmlhttp.send(null);
+/*      xmlhttp.setRequestHeader ("Accept", "text/plain");
+	  xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+      xmlhttp.send(params);*/
+}; // sendfunc
+
+/**
+ *	"Ajax" function that sends and processes xmlhttp request
+ *	@param params is GET request string
+ */
+function getZones(zone) {
+    var xmlhttp;
+	console.log("Zone is " + zone);
+	try {
+	   xmlhttp=new XMLHttpRequest();
+    } catch(e) {
+        xmlhttp = false;
+        console.log(e);
+    }
+	if (xmlhttp) {
+        xmlhttp.onreadystatechange=function() {
+		  if (xmlhttp.readyState==4)
+		  {  if ( (xmlhttp.status==200) || (xmlhttp.status==0) )
+            {
+              returnedList = (xmlhttp.responseText);
+              returnedList = JSON.parse(returnedList);
+              console.log(returnedList);
+              document.getElementById("fset_place").innerHTML=returnedList['sfront'];
+              document.getElementById("rset_place").innerHTML=returnedList['srear'];
+              document.getElementById("sset_place").innerHTML=returnedList['s1side'];
+			  document.getElementById("mbuild_place").innerHTML=returnedList['maxbuild'];
+			  document.getElementById("mheight_place").innerHTML=returnedList['pheight'];
+			  document.getElementById("mstories_place").innerHTML=returnedList['pstories'];
+			}
+		  }
+		};
+	}
+	xmlhttp.open("GET","http://feasibuild.tk/server.php?command=getZone&zone=" + zone, true);
 	xmlhttp.send(null);
 /*      xmlhttp.setRequestHeader ("Accept", "text/plain");
 	  xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
