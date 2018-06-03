@@ -413,6 +413,7 @@ function sendfunc() {
               var zone = features['Zoning1'];
               zone = zone.split(" ");
               console.log("zone is " + zone[0]);
+              getZones(zone[0]);
               updateMap(features);
 			}
 		  }
@@ -461,7 +462,7 @@ function getPoly(apn) {
 /*      xmlhttp.setRequestHeader ("Accept", "text/plain");
 	  xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
       xmlhttp.send(params);*/
-}; // sendfunc
+}; // getPoly
 
 /**
  *	"Ajax" function that sends and processes xmlhttp request
@@ -499,4 +500,4 @@ function getZones(zone) {
 /*      xmlhttp.setRequestHeader ("Accept", "text/plain");
 	  xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
       xmlhttp.send(params);*/
-}; // sendfunc
+}; // getZones
