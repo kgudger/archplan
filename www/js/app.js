@@ -41,175 +41,6 @@ console.log("In app.js");
 		});
 		marker.setMap(_map);
 
-//		buildField(36.655, -121.79, "#FF0000", "1", "Beets");
-
-/*	    var infoWindow;
-		var pname;
-		var myLatlng;
-		var field1Coords = [
-			new google.maps.LatLng(36.6502227, -121.7946188),
-			new google.maps.LatLng(36.655, -121.7946188),
-			new google.maps.LatLng(36.655, -121.79),
-			new google.maps.LatLng(36.6502227, -121.79),
-			new google.maps.LatLng(36.6502227, -121.7946188)
-		];
-  // Construct the polygon.
-  		cropField1 = new google.maps.Polygon({
-		    paths: field1Coords,
-		   	strokeColor: '#FF0000',
-		    strokeOpacity: 0.8,
-		    strokeWeight: 2,
-		    fillColor: '#FF0000',
-		    fillOpacity: 0.35,
-		    draggable: true,
-		    editable: true,
-		    geodesic: true
-		});
-		cropField1.setMap(_map);
-		myLatlng = new google.maps.LatLng(36.652, -121.792);
-		marker = new google.maps.Marker({
-			position: myLatlng,
-			map: _map,
-			title: 'Current Position'
-		});
-		marker.setMap(_map);
-	    var infoWindow1 = new google.maps.InfoWindow();
-		var pname1 = '<div style="color: black;">' + "Field 1<br>" + 
-			'date planted: 24 Jan 15<br>' +
-			'stock company: MV Seeds<br>' +  
-			'lot number: 07bcdi07<br>' +
-			'plant type: Beets' +'</div>';
-		google.maps.event.addListener(marker, 'click', function() {
-  			console.log('Vertex moved on outer path.');
-            infoWindow1.setContent(pname1);
-        	infoWindow1.open(_map, marker);
-		});
-*/
-//		buildField(36.6449, -121.788, "#00FF00", "2", "Lettuce");
-
-/*		var field2Coords = [
-			new google.maps.LatLng(36.6502227, -121.7946188),
-			new google.maps.LatLng(36.645, -121.7946188),
-			new google.maps.LatLng(36.6449, -121.788),
-			new google.maps.LatLng(36.6502227, -121.79),
-			new google.maps.LatLng(36.6502227, -121.7946188)
-		];
-  // Construct the polygon.
-  		cropField2 = new google.maps.Polygon({
-		    paths: field2Coords,
-		   	strokeColor: '#00FF00',
-		    strokeOpacity: 0.8,
-		    strokeWeight: 2,
-		    fillColor: '#00FF00',
-		    fillOpacity: 0.35,
-		    draggable: true,
-		    editable: true,
-		    geodesic: true
-		});
-		cropField2.setMap(_map);
-		myLatlng = new google.maps.LatLng(36.648, -121.792);
-		marker = new google.maps.Marker({
-			position: myLatlng,
-			map: _map,
-			title: 'Current Position'
-		});
-		marker.setMap(_map);
-	    var infoWindow2 = new google.maps.InfoWindow();
-		var pname2 = '<div style="color: black;">' + "Field 2<br>" + 
-			'date planted: 24 Jan 15<br>' +
-			'stock company: MV Seeds<br>' +  
-			'lot number: 05ecgi05<br>' +
-			'plant type: Lettuce' +'</div>';
-		google.maps.event.addListener(marker, 'click', function() {
-  			console.log('Vertex moved on outer path.');
-	        infoWindow2.setContent(pname2);
-        	infoWindow2.open(_map, marker);
-		});
-*/
-//		buildField(36.645, -121.80, "#0000FF", "3", "Carrots");
-
-/*		var field3Coords = [
-			new google.maps.LatLng(36.6502227, -121.7946188),
-			new google.maps.LatLng(36.645, -121.7946188),
-			new google.maps.LatLng(36.645, -121.80),
-			new google.maps.LatLng(36.6502227, -121.80),
-			new google.maps.LatLng(36.6502227, -121.7946188)
-		];
-  // Construct the polygon.
-  		cropField3 = new google.maps.Polygon({
-		    paths: field3Coords,
-		   	strokeColor: '#0000FF',
-		    strokeOpacity: 0.8,
-		    strokeWeight: 2,
-		    fillColor: '#0000FF',
-		    fillOpacity: 0.35,
-		    draggable: true,
-		    editable: true,
-		    geodesic: true
-		});
-		cropField3.setMap(_map);
-		myLatlng = new google.maps.LatLng(36.648, -121.798);
-		marker = new google.maps.Marker({
-			position: myLatlng,
-			map: _map,
-			title: 'Current Position'
-		});
-		marker.setMap(_map);
-	    var infoWindow3 = new google.maps.InfoWindow();
-		var pname3 = '<div style="color: black;">' + "Field 3<br>" + 
-			'date planted: 24 Jan 15<br>' +
-			'stock company: MV Seeds<br>' +  
-			'lot number: 08ecbi03<br>' +
-			'plant type: Carrots' +'</div>';
-		google.maps.event.addListener(marker, 'click', function() {
-  			console.log('Vertex moved on outer path.');
-	        infoWindow3.setContent(pname3);
-        	infoWindow3.open(_map, marker);
-		});
-*/
-//		buildField(36.655, -121.801, "#FFFF00", "4", "Cabbage");
-
-/*		var field4Coords = [
-			new google.maps.LatLng(36.6502227, -121.7946188),
-			new google.maps.LatLng(36.655, -121.7946188),
-			new google.maps.LatLng(36.6551, -121.801),
-			new google.maps.LatLng(36.6502227, -121.8),
-			new google.maps.LatLng(36.6502227, -121.7946188)
-		];
-  // Construct the polygon.
-  		cropField4 = new google.maps.Polygon({
-		    paths: field4Coords,
-		   	strokeColor: '#FFFF00',
-		    strokeOpacity: 0.8,
-		    strokeWeight: 2,
-		    fillColor: '#FFFF00',
-		    fillOpacity: 0.35,
-		    draggable: true,
-		    editable: true,
-		    geodesic: true
-		});
-		cropField4.setMap(_map);
-		myLatlng = new google.maps.LatLng(36.652, -121.798);
-		marker = new google.maps.Marker({
-			position: myLatlng,
-			map: _map,
-			title: 'Current Position'
-		});
-		marker.setMap(_map);
-	    var infoWindow4 = new google.maps.InfoWindow();
-		var pname4 = '<div style="color: black;">' + "Field 4<br>" + 
-			'date planted: 24 Jan 15<br>' +
-			'stock company: MV Seeds<br>' +  
-			'lot number: 06ncai01<br>' +
-			'plant type: Cabbage' +'</div>';
-		google.maps.event.addListener(marker, 'click', function() {
-  			console.log('Vertex moved on outer path.');
-	        infoWindow4.setContent(pname4);
-        	infoWindow4.open(_map, marker);
-		});
-//		bounds.extend(latlng);
-*/
-//		document.getElementById("geostat").innerHTML="";
 	};
 
 /**	buildField
@@ -351,6 +182,9 @@ console.log("In app.js");
       });
     }
   }		
+  
+var cropField ;
+var reducedPoly ;
 
 /**	updatePoly
  *	
@@ -363,15 +197,18 @@ console.log("In app.js");
 	function updatePoly(features) {
 		var fieldCoords = [];
 		var arrayLength = features.length;
+		var property1 = [] ;
 		for (var i = 0; i < arrayLength; i++) {
 			console.log("1=" + features[i][1] + " 0= " + features[i][0]);
 			fieldCoords.push(new google.maps.LatLng(features[i][1], features[i][0]));
+			property1.push(new Vector2(features[i][1], features[i][0]));
 		}
 
   // Construct the polygon.
-  		var cropField = new google.maps.Polygon({
+		if (typeof cropField !== 'undefined') { cropField.setMap(null); }
+  		cropField = new google.maps.Polygon({
 		    paths: fieldCoords,
-		   	strokeColor: 1,
+		   	strokeColor: '#14EEFE',
 		    strokeOpacity: 0.8,
 		    strokeWeight: 2,
 		    fillColor: 1,
@@ -381,7 +218,97 @@ console.log("In app.js");
 		    geodesic: true
 		});
 		cropField.setMap(_map);
+//		New smaller polygon goes here
+		fieldCoords = [];
+		if (typeof reducedPoly !== 'undefined') { reducedPoly.setMap(null); }
+		var fieldCoords2 = inflatePolygon(property1, -2.74319999583e-5); // 10 feet
+		arrayLength = fieldCoords2.length;
+		for (var i = 0; i < arrayLength; i++) {
+			console.log("X =" + fieldCoords2[i].x + " Y = " + fieldCoords2[i].y);
+			fieldCoords.push(new google.maps.LatLng(fieldCoords2[i].x.toString(),
+				fieldCoords2[i].y.toString()));
+		}
+		
+  		reducedPoly = new google.maps.Polygon({
+		    paths: fieldCoords,
+		   	strokeColor: '#ec494c',
+		    strokeOpacity: 0.8,
+		    strokeWeight: 2,
+		    fillColor: 1,
+		    fillOpacity: 0.0,
+		    draggable: false,
+		    editable: false,
+		    geodesic: true
+		});
+		reducedPoly.setMap(_map);
+
   }		
+
+function vectorCoordinates2JTS (polygon) {
+  var coordinates = [];
+
+  for (var i = 0; i < polygon.length; i++) {
+    coordinates.push(new jsts.geom.Coordinate(polygon[i].x, polygon[i].y));
+    console.log("X = " + coordinates[i].x + " and Y = " + coordinates[i].y);
+  }
+  return coordinates;
+}
+
+function inflatePolygon(poly, spacing)
+{
+  var geoInput = vectorCoordinates2JTS(poly);
+  geoInput.push(geoInput[0]);
+  console.log("geoInput " + geoInput[0].x);
+
+  var geometryFactory = new jsts.geom.GeometryFactory();
+
+  try {
+	var shell = geometryFactory.createPolygon(geoInput);
+    console.log("shell is " + shell);
+  }
+  catch(err) {
+    console.log("Error is " + err.message);
+  }
+
+  try {
+    var polygon = shell.buffer(spacing, jsts.operation.buffer.BufferParameters.CAP_FLAT);
+    console.log("poly is " + polygon);
+  }
+  catch(err) {
+    console.log("Error is " + err.message);
+  }
+
+  var inflatedCoordinates = [];
+  var oCoordinates;
+  oCoordinates = polygon.shell.points.coordinates;
+  for (i = 0; i < oCoordinates.length; i++) {
+    var oItem;
+    oItem = oCoordinates[i];
+    inflatedCoordinates.push(new google.maps.LatLng(oItem.x, oItem.y));
+    console.log("iX,Y = " + oItem.x + " and iY = " + oItem.y);
+  }
+  return oCoordinates ; //inflatedCoordinates;
+}
+/*
+var property1 = [
+	new Vector2(36.9530434040848,   -122.03296429697015),
+	new Vector2(36.95296468651526,  -122.03368781492003),
+	new Vector2(36.953773541799656, -122.03382895603836),
+	new Vector2(36.953826315585516, -122.03329982113146),
+	new Vector2(36.95362253861876,  -122.03326626425898),
+	new Vector2(36.95363807256827,  -122.03311978038441),
+	new Vector2(36.95357078962553,  -122.03310783112806),
+	new Vector2(36.953581522214364, -122.03301982319464),
+	new Vector2(36.95340744275806,  -122.03298593217909),
+	new Vector2(36.953403543286235, -122.03301802809266),
+	new Vector2(36.953125713309255, -122.0329765775434),
+	new Vector2(36.9530434040848,   -122.03296429697015)
+];*/
+function Vector2(x, y) 
+{
+    this.x = x;
+    this.y = y;
+}
 
 
 /**
