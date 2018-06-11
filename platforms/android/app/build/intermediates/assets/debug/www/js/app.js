@@ -7,18 +7,80 @@ Neither the name of the nor the names of its contributors may be used to endorse
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-var currentLatitude = 36.9741;
-var currentLongitude = -122.0308
+var currentLatitude = 0;
+var currentLongitude = 0;
+var options = {			// GPS options
+    timeout: 5000,
+    maximumAge: 20000,
+    enableHighAccuracy: true
+};
 var geocoder;
-var mapCanvas = document.getElementById('map_canvas');
+var mapCanvas;
 var _map ;
+var s1side = 0 ;
+var debug = true;
 
-console.log("In app.js");
+function consoLog(message) {
+	if (debug) 
+		console.log(message);
+}
+
+consoLog("In app.js");
 
     function initialize_map() {
-		console.log("In initalize");
-//		directionsService = new google.maps.DirectionsService();
-		latlngp = new google.maps.LatLng(currentLatitude, currentLongitude); // using global variable now
+		consoLog("In initalize");
+		mapCanvas = document.getElementById('map_canvas');
+		ready();
+	};
+
+/**
+ *	Fires when DOM page loaded
+ */
+function ready() {
+    if (navigator.geolocation) {
+		var location_timeout = setTimeout("defaultPosition()", 2000);
+		// changed to 2 seconds 
+        navigator.geolocation.getCurrentPosition(
+			function(pos) { clearTimeout(location_timeout); showPosition(pos); },
+			function(err) {
+				clearTimeout(location_timeout);
+				console.warn('ERROR(' + err.code + '): ' + err.message);
+				defaultPosition()
+			},
+			options
+		);
+    }
+    else {
+		console.warn("Geolocation failed. \nPlease enable GPS in Settings.", 1);
+		defaultPosition();
+	}
+}
+
+/** 
+ *	sets current latitude and longitude from ready() function
+ */
+function showPosition(position) {
+    currentLatitude = position.coords.latitude;
+	currentLongitude = position.coords.longitude;
+    consoLog("Lat is " + currentLatitude + " Lon is " + currentLongitude);
+    showMap();
+};
+
+/** 
+ *	on fail from ready, default position
+ */
+function defaultPosition() {
+	currentLatitude = 36.9741;
+	currentLongitude = -122.0308
+    consoLog("In defaultPosition Lat is " + currentLatitude + " Lon is " + currentLongitude);
+    showMap();
+}
+
+/**
+ *	showMap shows map after geolocation decided.
+ */
+function showMap() {
+		var latlngp = new google.maps.LatLng(currentLatitude, currentLongitude); // using global variable now
 	    var mapOptions = {
 			center: latlngp,
 			zoomControl: true,
@@ -30,242 +92,14 @@ console.log("In app.js");
     	    mapTypeId: google.maps.MapTypeId.roadmap
     	};
         _map = new google.maps.Map(mapCanvas, mapOptions);
-//		setTimeout("$('#map_canvas').gmap('refresh')",500);
-/*		directionsDisplay = new google.maps.DirectionsRenderer();
-		directionsDisplay.setMap(_map);
-		directionsDisplay.setPanel(document.getElementById('natsinglelist'));*/
 		var marker = new google.maps.Marker({
 			position: latlngp,
 			map: _map,
 			title: 'Current Position'
 		});
 		marker.setMap(_map);
+} // showMap
 
-//		buildField(36.655, -121.79, "#FF0000", "1", "Beets");
-
-/*	    var infoWindow;
-		var pname;
-		var myLatlng;
-		var field1Coords = [
-			new google.maps.LatLng(36.6502227, -121.7946188),
-			new google.maps.LatLng(36.655, -121.7946188),
-			new google.maps.LatLng(36.655, -121.79),
-			new google.maps.LatLng(36.6502227, -121.79),
-			new google.maps.LatLng(36.6502227, -121.7946188)
-		];
-  // Construct the polygon.
-  		cropField1 = new google.maps.Polygon({
-		    paths: field1Coords,
-		   	strokeColor: '#FF0000',
-		    strokeOpacity: 0.8,
-		    strokeWeight: 2,
-		    fillColor: '#FF0000',
-		    fillOpacity: 0.35,
-		    draggable: true,
-		    editable: true,
-		    geodesic: true
-		});
-		cropField1.setMap(_map);
-		myLatlng = new google.maps.LatLng(36.652, -121.792);
-		marker = new google.maps.Marker({
-			position: myLatlng,
-			map: _map,
-			title: 'Current Position'
-		});
-		marker.setMap(_map);
-	    var infoWindow1 = new google.maps.InfoWindow();
-		var pname1 = '<div style="color: black;">' + "Field 1<br>" + 
-			'date planted: 24 Jan 15<br>' +
-			'stock company: MV Seeds<br>' +  
-			'lot number: 07bcdi07<br>' +
-			'plant type: Beets' +'</div>';
-		google.maps.event.addListener(marker, 'click', function() {
-  			console.log('Vertex moved on outer path.');
-            infoWindow1.setContent(pname1);
-        	infoWindow1.open(_map, marker);
-		});
-*/
-//		buildField(36.6449, -121.788, "#00FF00", "2", "Lettuce");
-
-/*		var field2Coords = [
-			new google.maps.LatLng(36.6502227, -121.7946188),
-			new google.maps.LatLng(36.645, -121.7946188),
-			new google.maps.LatLng(36.6449, -121.788),
-			new google.maps.LatLng(36.6502227, -121.79),
-			new google.maps.LatLng(36.6502227, -121.7946188)
-		];
-  // Construct the polygon.
-  		cropField2 = new google.maps.Polygon({
-		    paths: field2Coords,
-		   	strokeColor: '#00FF00',
-		    strokeOpacity: 0.8,
-		    strokeWeight: 2,
-		    fillColor: '#00FF00',
-		    fillOpacity: 0.35,
-		    draggable: true,
-		    editable: true,
-		    geodesic: true
-		});
-		cropField2.setMap(_map);
-		myLatlng = new google.maps.LatLng(36.648, -121.792);
-		marker = new google.maps.Marker({
-			position: myLatlng,
-			map: _map,
-			title: 'Current Position'
-		});
-		marker.setMap(_map);
-	    var infoWindow2 = new google.maps.InfoWindow();
-		var pname2 = '<div style="color: black;">' + "Field 2<br>" + 
-			'date planted: 24 Jan 15<br>' +
-			'stock company: MV Seeds<br>' +  
-			'lot number: 05ecgi05<br>' +
-			'plant type: Lettuce' +'</div>';
-		google.maps.event.addListener(marker, 'click', function() {
-  			console.log('Vertex moved on outer path.');
-	        infoWindow2.setContent(pname2);
-        	infoWindow2.open(_map, marker);
-		});
-*/
-//		buildField(36.645, -121.80, "#0000FF", "3", "Carrots");
-
-/*		var field3Coords = [
-			new google.maps.LatLng(36.6502227, -121.7946188),
-			new google.maps.LatLng(36.645, -121.7946188),
-			new google.maps.LatLng(36.645, -121.80),
-			new google.maps.LatLng(36.6502227, -121.80),
-			new google.maps.LatLng(36.6502227, -121.7946188)
-		];
-  // Construct the polygon.
-  		cropField3 = new google.maps.Polygon({
-		    paths: field3Coords,
-		   	strokeColor: '#0000FF',
-		    strokeOpacity: 0.8,
-		    strokeWeight: 2,
-		    fillColor: '#0000FF',
-		    fillOpacity: 0.35,
-		    draggable: true,
-		    editable: true,
-		    geodesic: true
-		});
-		cropField3.setMap(_map);
-		myLatlng = new google.maps.LatLng(36.648, -121.798);
-		marker = new google.maps.Marker({
-			position: myLatlng,
-			map: _map,
-			title: 'Current Position'
-		});
-		marker.setMap(_map);
-	    var infoWindow3 = new google.maps.InfoWindow();
-		var pname3 = '<div style="color: black;">' + "Field 3<br>" + 
-			'date planted: 24 Jan 15<br>' +
-			'stock company: MV Seeds<br>' +  
-			'lot number: 08ecbi03<br>' +
-			'plant type: Carrots' +'</div>';
-		google.maps.event.addListener(marker, 'click', function() {
-  			console.log('Vertex moved on outer path.');
-	        infoWindow3.setContent(pname3);
-        	infoWindow3.open(_map, marker);
-		});
-*/
-//		buildField(36.655, -121.801, "#FFFF00", "4", "Cabbage");
-
-/*		var field4Coords = [
-			new google.maps.LatLng(36.6502227, -121.7946188),
-			new google.maps.LatLng(36.655, -121.7946188),
-			new google.maps.LatLng(36.6551, -121.801),
-			new google.maps.LatLng(36.6502227, -121.8),
-			new google.maps.LatLng(36.6502227, -121.7946188)
-		];
-  // Construct the polygon.
-  		cropField4 = new google.maps.Polygon({
-		    paths: field4Coords,
-		   	strokeColor: '#FFFF00',
-		    strokeOpacity: 0.8,
-		    strokeWeight: 2,
-		    fillColor: '#FFFF00',
-		    fillOpacity: 0.35,
-		    draggable: true,
-		    editable: true,
-		    geodesic: true
-		});
-		cropField4.setMap(_map);
-		myLatlng = new google.maps.LatLng(36.652, -121.798);
-		marker = new google.maps.Marker({
-			position: myLatlng,
-			map: _map,
-			title: 'Current Position'
-		});
-		marker.setMap(_map);
-	    var infoWindow4 = new google.maps.InfoWindow();
-		var pname4 = '<div style="color: black;">' + "Field 4<br>" + 
-			'date planted: 24 Jan 15<br>' +
-			'stock company: MV Seeds<br>' +  
-			'lot number: 06ncai01<br>' +
-			'plant type: Cabbage' +'</div>';
-		google.maps.event.addListener(marker, 'click', function() {
-  			console.log('Vertex moved on outer path.');
-	        infoWindow4.setContent(pname4);
-        	infoWindow4.open(_map, marker);
-		});
-//		bounds.extend(latlng);
-*/
-//		document.getElementById("geostat").innerHTML="";
-	};
-
-/**	buildField
- *	builds field from lat lon
- *
- *	@param latitude is farthest latitude from center
- *	@param longitude is farthest longitude from center
- *	@param color is color of polygon
- *	@param cname is name of field
- *	@param crop is crop type
- */
-	function buildField(latitude, longitude, color, cname, crop) {
-		var fieldCoords = [
-			new google.maps.LatLng(36.6502227, -121.7946188),
-			new google.maps.LatLng(latitude, -121.7946188),
-			new google.maps.LatLng(latitude, longitude),
-			new google.maps.LatLng(36.6502227, longitude),
-			new google.maps.LatLng(36.6502227, -121.7946188)
-		];
-
-  // Construct the polygon.
-  		var cropField = new google.maps.Polygon({
-		    paths: fieldCoords,
-		   	strokeColor: color,
-		    strokeOpacity: 0.8,
-		    strokeWeight: 2,
-		    fillColor: color,
-		    fillOpacity: 0.35,
-		    draggable: true,
-		    editable: true,
-		    geodesic: true
-		});
-
-		cropField.setMap(_map);
-
-		var latavg = ((latitude - 36.650227) / 2) + 36.650227 ;
-		var lonavg = ((longitude - (-121.7946188)) / 2) - 121.7946188 ;
-		var myLatlng = new google.maps.LatLng(latavg,lonavg);
-		var marker = new google.maps.Marker({
-			position: myLatlng,
-			map: _map,
-			title: 'Current Position'
-		});
-		marker.setMap(_map);
-	    var infoWindow = new google.maps.InfoWindow();
-		var pname = '<div style="color: black;">' + "Field " + cname + "<br>" + 
-			'date planted: 24 Jan 15<br>' +
-			'stock company: MV Seeds<br>' +  
-			'lot number: 06ncai01<br>' +
-			'plant type: ' + crop +'</div>';
-		google.maps.event.addListener(marker, 'click', function() {
-  			console.log('Vertex moved on outer path.');
-	        infoWindow.setContent(pname);
-        	infoWindow.open(_map, marker);
-		});
-	};
 
 	function handleNoGeolocation(errorFlag) {
 		if (errorFlag) {
@@ -289,7 +123,7 @@ console.log("In app.js");
 	 *	@param p is passed from intel library function
 	 */
 	var suc = function(p) {
-//	    console.log("geolocation success", 4);
+//	    consoLog("geolocation success", 4);
 	    //Draws the map initially
     	currentLatitude = p.coords.latitude;
     	currentLongitude = p.coords.longitude;
@@ -299,17 +133,13 @@ console.log("In app.js");
 	 *	fail function for intel gps routine - does nothing 
 	 */			    
 	var fail = function() {
-	    console.log("Geolocation failed. \nPlease enable GPS in Settings.", 1);
+	    consoLog("Geolocation failed. \nPlease enable GPS in Settings.", 1);
 		document.getElementById("geostat").innerHTML="Geolocation failed. \nPlease enable GPS in Settings.";
 	};
 
 /**	updateMap
  *	
- *	@param latitude is farthest latitude from center
- *	@param longitude is farthest longitude from center
- *	@param color is color of polygon
- *	@param cname is name of field
- *	@param crop is crop type
+ *	@param features is from AJAX call
  */
 	function updateMap(features) {
 	  document.getElementById("add_place").innerHTML=features['Address'];
@@ -321,7 +151,7 @@ console.log("In app.js");
        geocoder.geocode( { 'address': features['Address']}, function(results, status) {
         if (status == google.maps.GeocoderStatus.OK) {
           if (status != google.maps.GeocoderStatus.ZERO_RESULTS) {
-			console.log("Geocode OK" + results[0].geometry.location);
+			consoLog("Geocode OK" + results[0].geometry.location);
           _map.setCenter(results[0].geometry.location);
 
             var infowindow = new google.maps.InfoWindow(
@@ -339,7 +169,7 @@ console.log("In app.js");
             });
             var apnnd = features['APN']
             apnnd = apnnd.replace(/-/g, '')
- 			console.log("APN " + apnnd);
+ 			consoLog("APN " + apnnd);
             getPoly(apnnd)
 
           } else {
@@ -351,27 +181,29 @@ console.log("In app.js");
       });
     }
   }		
+  
+var cropField ;
+var reducedPoly ;
 
 /**	updatePoly
  *	
- *	@param latitude is farthest latitude from center
- *	@param longitude is farthest longitude from center
- *	@param color is color of polygon
- *	@param cname is name of field
- *	@param crop is crop type
+ *	@param features from AJAX call
  */
 	function updatePoly(features) {
 		var fieldCoords = [];
 		var arrayLength = features.length;
+		var property1 = [] ;
 		for (var i = 0; i < arrayLength; i++) {
-			console.log("1=" + features[i][1] + " 0= " + features[i][0]);
+			consoLog("1=" + features[i][1] + " 0= " + features[i][0]);
 			fieldCoords.push(new google.maps.LatLng(features[i][1], features[i][0]));
+			property1.push(new Vector2(features[i][1], features[i][0]));
 		}
 
   // Construct the polygon.
-  		var cropField = new google.maps.Polygon({
+		if (typeof cropField !== 'undefined') { cropField.setMap(null); }
+  		cropField = new google.maps.Polygon({
 		    paths: fieldCoords,
-		   	strokeColor: 1,
+		   	strokeColor: '#14EEFE',
 		    strokeOpacity: 0.8,
 		    strokeWeight: 2,
 		    fillColor: 1,
@@ -381,10 +213,98 @@ console.log("In app.js");
 		    geodesic: true
 		});
 		cropField.setMap(_map);
+//		New smaller polygon goes here
+		fieldCoords = [];
+		if (typeof reducedPoly !== 'undefined') { reducedPoly.setMap(null); }
+		var fieldCoords2 = inflatePolygon(property1, s1side * -2.74319999583e-6); // 10 feet
+		arrayLength = fieldCoords2.length;
+		for (var i = 0; i < arrayLength; i++) {
+			consoLog("X =" + fieldCoords2[i].x + " Y = " + fieldCoords2[i].y);
+			fieldCoords.push(new google.maps.LatLng(fieldCoords2[i].x.toString(),
+				fieldCoords2[i].y.toString()));
+		}
+		
+  		reducedPoly = new google.maps.Polygon({
+		    paths: fieldCoords,
+		   	strokeColor: '#ec494c',
+		    strokeOpacity: 0.8,
+		    strokeWeight: 2,
+		    fillColor: 1,
+		    fillOpacity: 0.0,
+		    draggable: false,
+		    editable: false,
+		    geodesic: true
+		});
+		reducedPoly.setMap(_map);
+
   }		
 
+/** vectorCoordinates2JTS 
+ * @param polygon is polygon to push coordinates into object
+ */
+function vectorCoordinates2JTS (polygon) {
+  var coordinates = [];
 
-/**
+  for (var i = 0; i < polygon.length; i++) {
+    coordinates.push(new jsts.geom.Coordinate(polygon[i].x, polygon[i].y));
+    consoLog("X = " + coordinates[i].x + " and Y = " + coordinates[i].y);
+  }
+  return coordinates;
+}
+
+/** inflatePolygon
+ * @param poly
+ * @param spacing
+ */
+function inflatePolygon(poly, spacing)
+{
+  var geoInput = vectorCoordinates2JTS(poly);
+  geoInput.push(geoInput[0]);
+  consoLog("geoInput " + geoInput[0].x);
+
+  var geometryFactory = new jsts.geom.GeometryFactory();
+
+  try {
+	var shell = geometryFactory.createPolygon(geoInput);
+    consoLog("shell is " + shell);
+  }
+  catch(err) {
+    consoLog("Error is " + err.message);
+  }
+
+  try {
+    var polygon = shell.buffer(spacing, jsts.operation.buffer.BufferParameters.CAP_FLAT);
+    consoLog("poly is " + polygon);
+  }
+  catch(err) {
+    consoLog("Error is " + err.message);
+  }
+
+  var inflatedCoordinates = [];
+  var oCoordinates;
+  oCoordinates = polygon.shell.points.coordinates;
+  for (i = 0; i < oCoordinates.length; i++) {
+    var oItem;
+    oItem = oCoordinates[i];
+    inflatedCoordinates.push(new google.maps.LatLng(oItem.x, oItem.y));
+    consoLog("iX,Y = " + oItem.x + " and iY = " + oItem.y);
+  }
+  return oCoordinates ; //inflatedCoordinates;
+}
+
+/** Vector2
+ *  @param x is x
+ *  @param y is y
+ *  @return object with .x and .y
+ */
+function Vector2(x, y) 
+{
+    this.x = x;
+    this.y = y;
+}
+
+
+/** sendfunc
  *	"Ajax" function that sends and processes xmlhttp request
  *	@param params is GET request string
  */
@@ -393,12 +313,12 @@ function sendfunc() {
 	var address = document.getElementById("address").value
 //	address += " Santa Cruz CA";
 	address = encodeURI(address);
-	console.log("Address is " + address);
+	consoLog("Address is " + address);
 	try {
 	   xmlhttp=new XMLHttpRequest();
     } catch(e) {
         xmlhttp = false;
-        console.log(e);
+        consoLog(e);
     }
 	if (xmlhttp) {
         xmlhttp.onreadystatechange=function() {
@@ -408,10 +328,10 @@ function sendfunc() {
               returnedList = (xmlhttp.responseText);
               returnedList = JSON.parse(returnedList);
               var features = returnedList['features']['0']['attributes'];
-              console.log(features);
+              consoLog(features);
               var zone = features['Zoning1'];
               zone = zone.split(" ");
-              console.log("zone is " + zone[0]);
+              consoLog("zone is " + zone[0]);
               getZones(zone[0]);
               updateMap(features);
 			}
@@ -420,23 +340,20 @@ function sendfunc() {
 	}
 	xmlhttp.open("GET","https://vw8.cityofsantacruz.com/server/rest/services/search/MapServer/0/query?f=json&where=Upper(Address)%20LIKE%20Upper(%27%25" + address + "%25%27)&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=Address%2CSiteAdd2%2CAPN%2CUseCode%2CParcelSizeSqFt%2CCOASTALZ%2CZoning1&outSR=102643", true);
 	xmlhttp.send(null);
-/*      xmlhttp.setRequestHeader ("Accept", "text/plain");
-	  xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-      xmlhttp.send(params);*/
 }; // sendfunc
 
-/**
+/** getPoly
  *	"Ajax" function that sends and processes xmlhttp request
- *	@param params is GET request string
+ *	@param apn is APN from previous AJAX function
  */
 function getPoly(apn) {
     var xmlhttp;
-	console.log("APN is " + apn);
+	consoLog("APN is " + apn);
 	try {
 	   xmlhttp=new XMLHttpRequest();
     } catch(e) {
         xmlhttp = false;
-        console.log(e);
+        consoLog(e);
     }
 	if (xmlhttp) {
         xmlhttp.onreadystatechange=function() {
@@ -446,11 +363,7 @@ function getPoly(apn) {
               returnedList = (xmlhttp.responseText);
               returnedList = JSON.parse(returnedList);
               var features = returnedList['features']['0']['geometry']['rings']['0'];
-              console.log(features);
-/*              var zone = features['Zoning1'];
-              zone = zone.split(" ");
-              console.log("zone is " + zone[0]);
-              getZones(zone[0]);*/
+              consoLog(features);
               updatePoly(features);
 			}
 		  }
@@ -458,23 +371,20 @@ function getPoly(apn) {
 	}
 	xmlhttp.open("GET","https://gis.co.santa-cruz.ca.us/sccgis/rest/services/OpenData_Build_Single/MapServer/145/query?where=APNNODASH%20%3D%20%27" + apn + "%27&outFields=GP_LANDUSE&outSR=4326&f=json", true);
 	xmlhttp.send(null);
-/*      xmlhttp.setRequestHeader ("Accept", "text/plain");
-	  xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-      xmlhttp.send(params);*/
 }; // getPoly
 
-/**
+/** getZones
  *	"Ajax" function that sends and processes xmlhttp request
- *	@param params is GET request string
+ *	@param zone is zoning designation for call to db
  */
 function getZones(zone) {
     var xmlhttp;
-	console.log("Zone is " + zone);
+	consoLog("Zone is " + zone);
 	try {
 	   xmlhttp=new XMLHttpRequest();
     } catch(e) {
         xmlhttp = false;
-        console.log(e);
+        consoLog(e);
     }
 	if (xmlhttp) {
         xmlhttp.onreadystatechange=function() {
@@ -483,10 +393,11 @@ function getZones(zone) {
             {
               returnedList = (xmlhttp.responseText);
               returnedList = JSON.parse(returnedList);
-              console.log(returnedList);
+              consoLog(returnedList);
               document.getElementById("fset_place").innerHTML=returnedList['sfront'];
               document.getElementById("rset_place").innerHTML=returnedList['srear'];
               document.getElementById("sset_place").innerHTML=returnedList['s1side'];
+              s1side = returnedList['s1side'];
 			  document.getElementById("mbuild_place").innerHTML=returnedList['maxbuild'];
 			  document.getElementById("mheight_place").innerHTML=returnedList['pheight'];
 			  document.getElementById("mstories_place").innerHTML=returnedList['pstories'];
@@ -496,7 +407,4 @@ function getZones(zone) {
 	}
 	xmlhttp.open("GET","http://feasibuild.tk/server.php?command=getZone&zone=" + zone, true);
 	xmlhttp.send(null);
-/*      xmlhttp.setRequestHeader ("Accept", "text/plain");
-	  xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-      xmlhttp.send(params);*/
 }; // getZones
