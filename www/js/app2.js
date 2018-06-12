@@ -7,11 +7,23 @@ Neither the name of the nor the names of its contributors may be used to endorse
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/** Object for functions for getting apn and zoning
+ *  index is district
+ */
+
+var getAPN = {
+	CityofSantaCruz    : function(muni) { sendfunc(muni); },
+	CountyofSantaCruz  : function(muni) { sendfunc(muni); },
+	CityofCapitola     : function(muni) { sendfunc(muni); },
+	CityofWatsonville  : function(muni) { sendfunc(muni); },
+	CityofScottsValley : function(muni) { sendfunc(muni); }
+};
+
 /** sendfunc
  *	"Ajax" function that sends and processes xmlhttp request
- *	@param params is GET request string
+ *	@param muni is municipality
  */
-function sendfunc() {
+function sendfunc(muni) {
     var xmlhttp;
 	var address = document.getElementById("address").value
 //	address += " Santa Cruz CA";
@@ -35,7 +47,7 @@ function sendfunc() {
               var zone = features['Zoning1'];
               zone = zone.split(" ");
               consoLog("zone is " + zone[0]);
-              getZones(zone[0]);
+              getZones(muni, zone[0]);
               updateMap(features);
 			}
 		  }
@@ -181,7 +193,7 @@ function getPoly(apn) {
  *	"Ajax" function that sends and processes xmlhttp request
  *	@param zone is zoning designation for call to db
  */
-function getZones(zone) {
+function getZones(muni,zone) {
     var xmlhttp;
 	consoLog("Zone is " + zone);
 	try {
@@ -209,6 +221,6 @@ function getZones(zone) {
 		  }
 		};
 	}
-	xmlhttp.open("GET","http://feasibuild.tk/server.php?command=getZone&zone=" + zone, true);
+	xmlhttp.open("GET","http://feasibuild.tk/server.php?command=getZone&muni=" + muni + "&zone=" + zone, true);
 	xmlhttp.send(null);
 }; // getZones

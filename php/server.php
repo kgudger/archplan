@@ -34,7 +34,8 @@
   // determine which command will be run
   if($command == "getZone") {
 	$zone = $_REQUEST['zone'];
-	echo $db->getZone($zone);
+	$muni = $_REQUEST['muni'];
+	echo $db->getZone($muni,$zone);
   }
   else
     echo "command was not recognized";

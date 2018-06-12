@@ -29,15 +29,16 @@ class DB
 	    return $this->db ;
 	}
 
-	function getZone($zone) 
+	function getZone($muni, $zone) 
 	{
 	  $output = array();
-	  if ( $zone != "" ) {
+	  if ( ( $zone != "" ) && ( $muni != "" ) ) {
 		$sql = "SELECT * 
 			FROM zones 
-			WHERE `zone` = :zoney";
+			WHERE `zone` = :zoney AND 
+			      `muni` = :muny" ;
 		$stmt = $this->db->prepare($sql);
-		$stmt->execute([':zoney' => $zone]);
+		$stmt->execute([':zoney' => $zone, ':muny' => $muni]);
 		$row = $stmt->fetch(PDO::FETCH_ASSOC);
 //		$output[] = $row[0] / 50 ;
 //		echo ($row["SUM(number)"]) ;

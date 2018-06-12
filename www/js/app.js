@@ -170,4 +170,13 @@ function Vector2(x, y)
     this.y = y;
 }
 
+/** getProp
+ *	"Ajax" function that sends and processes xmlhttp request
+ *	@param params is GET request string
+ */
+function getProp() {
+	var muni = document.getElementById("city").value;
+	consoLog("Muni is " + muni);
+	getAPN[muni](muni);
+} // getProp
 
