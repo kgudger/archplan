@@ -23,7 +23,17 @@ var getAPN = {
 		siteFunc : function(muni,returnedList) { updateSiteSCi(muni, returnedList); },
 		polyFunc : function(muni,returnedList) { updatePolySCi(muni, returnedList); }
 	},
-	CountyofSantaCruz  : function(muni,address) { sendfunc(muni,address); },
+	CountyofSantaCruz  : { 
+		sendFunc : function(muni,address) { consoLog("http://gis.co.santa-cruz.ca.us/sccgis/rest/services/GISwebLocator/GeocodeServer/findAddressCandidates?Single%20Line%20Input=" + encodeURI(address) + "&f=json&outFields=*");
+				sendfunc(muni,
+			"http://gis.co.santa-cruz.ca.us/sccgis/rest/services/GISwebLocator/GeocodeServer/findAddressCandidates?Single%20Line%20Input=" + address + "&f=json&outFields=*",
+			this.apiFunc); },
+		apiFunc  : function(muni,returnedList) { getAPNSCo(muni, returnedList); },
+		zoneFunc : function(muni,returnedList) { getZonesSCo(muni, returnedList); },
+		siteFunc : function(muni,returnedList) { updateSiteSCi(muni, returnedList); },
+		polyFunc : function(muni,returnedList) { updatePolySCi(muni, returnedList); }
+	},
+
 	CityofCapitola     : function(muni,address) { sendfunc(muni,address); },
 	CityofWatsonville  : function(muni,address) { sendfunc(muni,address); },
 	CityofScottsValley : function(muni,address) { sendfunc(muni,address); }
@@ -349,3 +359,43 @@ function addPoly2Map(fieldCoords, cropfield, color, ) {
 	});
 	cropfield.setMap(_map);
 } // addPoly2Map
+
+/** getAPNSCo
+ *	"Ajax" function that sends and processes xmlhttp request
+ *	@param muni is minicipality in db
+ *	@param zone is zoning designation for call to db
+ *	@param zone is zoning designation for call to db
+ */
+function getAPNSCo(muni, returnedList) {
+    consoLog(returnedList);
+	var features = returnedList['candidates']['0']['attributes'];
+    consoLog(features);
+    p_address = features['House'] + " " + features['PreDir'] + " " + features['StreetName'] + features['SufType'];
+	document.getElementById("add_place").innerHTML=p_address;
+    var urlz = "https://gis.co.santa-cruz.ca.us/sccgis/rest/services/OpenData_Build_Single/MapServer/145/query?where=SITEADD%20LIKE%20UPPER%28%20%272376%20N%20RODEO%20GULCH%20RD%27%29&outFields=APNNODASH,SQUAREFT,SITEADD,SITEADD2,ZONING,NAME&outSR=4326&f=json" ;
+//	consoLog("Zone is " + nzone);
+	sendfunc(muni, urlz, getAPN[muni].zoneFunc);
+}; // getAPNSCo
+
+/** getZonesSCo
+ *	"Ajax" function that sends and processes xmlhttp request
+ *	@param muni is minicipality in db
+ *	@param zone is zoning designation for call to db
+ *	@param zone is zoning designation for call to db
+ */
+function getZonesSCo(muni, returnedList) {
+    consoLog(returnedList);
+	var features = returnedList['features']['0']['attributes'];
+	document.getElementById("apn_place").innerHTML=features['APNNODASH'];
+	document.getElementById("zone_place").innerHTML=features['ZONING'];
+	document.getElementById("lot_place").innerHTML=features['SQUAREFT']+ "Sq. Ft.";
+    var zone = features['ZONING'];
+    zone = zone.split(" ");
+    var nzone = zone[0];
+    p_apnnd = features['APNNODASH']
+    var urlz = "http://feasibuild.tk/server.php?command=getZone&muni=" + muni + "&zone=" + nzone ;
+	consoLog("Zone is " + nzone);
+//	getZones(muni, urlz, address, apnnd);
+	sendfunc(muni, urlz, getAPN[muni].siteFunc);
+}; // getZonesSCo
+

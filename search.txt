@@ -28,3 +28,10 @@ https://gis.co.santa-cruz.ca.us/sccgis/rest/services/OpenData_Build_Single/MapSe
 sendfunc() xmlhttp.open("GET","https://vw8.cityofsantacruz.com
 sendfunc - updateMap - getPoly(apn) xmlhttp.open("GET","https://gis.co.santa-cruz.ca.us
 getZones(zone) xmlhttp.open("GET","http://feasibuild.tk/
+
+https://gis.co.santa-cruz.ca.us/sccgis/rest/services/OpenData_Build_Single/MapServer/145/query?where=SITEADD%20LIKE%20UPPER%28%20%27520%20HIGH%20ST%27%29&outFields=GP_LANDUSE,SITEADD&outSR=4326&f=json
+
+APNNODASH,SQUAREFT,SITEADD,SITEADD2,ZONING,NAME
+
+http://gis.co.santa-cruz.ca.us/sccgis/rest/services/GISwebLocator/GeocodeServer/findAddressCandidates?Single%20Line%20Input=2376%20n%20rodeo%20gulch&f=json&outFields=*
+http://gis.co.santa-cruz.ca.us/sccgis/rest/services/GISwebLocator/GeocodeServer/findAddressCandidates?Single%20Line%20Input=2376%2520n%2520rodeo%2520gulch%2520rd&f=json&outFields=*
