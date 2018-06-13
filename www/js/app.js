@@ -176,7 +176,10 @@ function Vector2(x, y)
  */
 function getProp() {
 	var muni = document.getElementById("city").value;
+	var address = document.getElementById("address").value
+	address = encodeURI(address);
+	consoLog("Address is " + address);
 	consoLog("Muni is " + muni);
-	getAPN[muni](muni);
+	getAPN[muni].sendFunc(muni,address);
 } // getProp
 
