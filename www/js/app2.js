@@ -12,6 +12,7 @@ var p_apnnd ; // global variable for send functions
 
 /** Object for functions for getting apn and zoning
  *  index is district
+ *  each function entry calls sendfunc which then calls another entry
  */
 
 var getAPN = {
@@ -24,8 +25,7 @@ var getAPN = {
 		polyFunc : function(muni,returnedList) { updatePolySCi(muni, returnedList); }
 	},
 	CountyofSantaCruz  : { 
-		sendFunc : function(muni,address) { consoLog("http://gis.co.santa-cruz.ca.us/sccgis/rest/services/GISwebLocator/GeocodeServer/findAddressCandidates?Single%20Line%20Input=" + encodeURI(address) + "&f=json&outFields=*");
-				sendfunc(muni,
+		sendFunc : function(muni,address) { sendfunc(muni,
 			"http://gis.co.santa-cruz.ca.us/sccgis/rest/services/GISwebLocator/GeocodeServer/findAddressCandidates?Single%20Line%20Input=" + address + "&f=json&outFields=*",
 			this.apiFunc); },
 		apiFunc  : function(muni,returnedList) { getAPNSCo(muni, returnedList); },
@@ -39,48 +39,11 @@ var getAPN = {
 	CityofScottsValley : function(muni,address) { sendfunc(muni,address); }
 };
 
-/** sendHTTP
- *	"Ajax" function that sends and processes xmlhttp request
-	var address = document.getElementById("address").value
-	address = encodeURI(address);
-	consoLog("Address is " + address);
-	urlin = "https://vw8.cityofsantacruz.com/server/rest/services/search/MapServer/0/query?f=json&where=Upper(Address)%20LIKE%20Upper(%27%25" + address + "%25%27)&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=Address%2CSiteAdd2%2CAPN%2CUseCode%2CParcelSizeSqFt%2CCOASTALZ%2CZoning1&outSR=102643"
- *	@param muni is municipality
- */
-function sendHTTP(urlin,retFun,nextCall) {
-    var xmlhttp;
-	try {
-	   xmlhttp=new XMLHttpRequest();
-    } catch(e) {
-        xmlhttp = false;
-        consoLog(e);
-    }
-	if (xmlhttp) {
-        xmlhttp.onreadystatechange=function() {
-		  if (xmlhttp.readyState==4)
-		  {  if ( (xmlhttp.status==200) || (xmlhttp.status==0) )
-            {
-              returnedList = (xmlhttp.responseText);
-              returnedList = JSON.parse(returnedList);
-              var features = returnedList['features']['0']['attributes'];
-              consoLog(features);
-              retFun(features);
-/*              var zone = features['Zoning1'];
-              zone = zone.split(" ");
-              consoLog("zone is " + zone[0]);
-              getZones(muni, zone[0]);
-              updateMap(features);*/
-			}
-		  }
-		};
-	}
-	xmlhttp.open("GET",urlin, true);
-	xmlhttp.send(null);
-}; // sendfunc
-
 /** sendfunc
  *	"Ajax" function that sends and processes xmlhttp request
  *	@param muni is municipality
+ *	@param address is URL to call
+ *	@param nextCall is function to call with returnedList
  */
 function sendfunc(muni, address, nextCall) {
     var xmlhttp;
@@ -97,14 +60,8 @@ function sendfunc(muni, address, nextCall) {
             {
               returnedList = (xmlhttp.responseText);
               returnedList = JSON.parse(returnedList);
+              consoLog(returnedList);
               nextCall(muni,returnedList);
-/*              var features = returnedList['features']['0']['attributes'];
-              consoLog(features);
-              var zone = features['Zoning1'];
-              zone = zone.split(" ");
-              consoLog("zone is " + zone[0]);
-              getZones(muni, zone[0]);
-              updateMap(features); */
 			}
 		  }
 		};
@@ -115,7 +72,7 @@ function sendfunc(muni, address, nextCall) {
 
 /**	updateMap
  *	
- *	@param features is from AJAX call
+ *	Updates map with new center and marker from p_address
  */
 	function updateMap() {
 	  geocoder = new google.maps.Geocoder();
@@ -152,98 +109,13 @@ function sendfunc(muni, address, nextCall) {
     }
   }		
   
-/**	updatePoly
- *	
- *	@param features from AJAX call
- */
-	function updatePoly(features) {
-		var fieldCoords = [];
-		var arrayLength = features.length;
-		var property1 = [] ;
-		for (var i = 0; i < arrayLength; i++) {
-			consoLog("1=" + features[i][1] + " 0= " + features[i][0]);
-			fieldCoords.push(new google.maps.LatLng(features[i][1], features[i][0]));
-			property1.push(new Vector2(features[i][1], features[i][0]));
-		}
-
-  // Construct the polygon.
-		if (typeof cropField !== 'undefined') { cropField.setMap(null); }
-  		cropField = new google.maps.Polygon({
-		    paths: fieldCoords,
-		   	strokeColor: '#14EEFE',
-		    strokeOpacity: 0.8,
-		    strokeWeight: 2,
-		    fillColor: 1,
-		    fillOpacity: 0.0,
-		    draggable: false,
-		    editable: false,
-		    geodesic: true
-		});
-		cropField.setMap(_map);
-//		New smaller polygon goes here
-		fieldCoords = [];
-		if (typeof reducedPoly !== 'undefined') { reducedPoly.setMap(null); }
-		var fieldCoords2 = inflatePolygon(property1, s1side * -2.74319999583e-6); // 10 feet
-		arrayLength = fieldCoords2.length;
-		for (var i = 0; i < arrayLength; i++) {
-			consoLog("X =" + fieldCoords2[i].x + " Y = " + fieldCoords2[i].y);
-			fieldCoords.push(new google.maps.LatLng(fieldCoords2[i].x.toString(),
-				fieldCoords2[i].y.toString()));
-		}
-		
-  		reducedPoly = new google.maps.Polygon({
-		    paths: fieldCoords,
-		   	strokeColor: '#ec494c',
-		    strokeOpacity: 0.8,
-		    strokeWeight: 2,
-		    fillColor: 1,
-		    fillOpacity: 0.0,
-		    draggable: false,
-		    editable: false,
-		    geodesic: true
-		});
-		reducedPoly.setMap(_map);
-
-  }		
-
-/** getPoly
- *	"Ajax" function that sends and processes xmlhttp request
- *	@param apn is APN from previous AJAX function
- */
-function getPoly(apn) {
-    var xmlhttp;
-	consoLog("APN is " + apn);
-	try {
-	   xmlhttp=new XMLHttpRequest();
-    } catch(e) {
-        xmlhttp = false;
-        consoLog(e);
-    }
-	if (xmlhttp) {
-        xmlhttp.onreadystatechange=function() {
-		  if (xmlhttp.readyState==4)
-		  {  if ( (xmlhttp.status==200) || (xmlhttp.status==0) )
-            {
-              returnedList = (xmlhttp.responseText);
-              returnedList = JSON.parse(returnedList);
-              var features = returnedList['features']['0']['geometry']['rings']['0'];
-              consoLog(features);
-              updatePoly(features);
-			}
-		  }
-		};
-	}
-	xmlhttp.open("GET","https://gis.co.santa-cruz.ca.us/sccgis/rest/services/OpenData_Build_Single/MapServer/145/query?where=APNNODASH%20%3D%20%27" + apn + "%27&outFields=GP_LANDUSE&outSR=4326&f=json", true);
-	xmlhttp.send(null);
-}; // getPoly
-
 /** getZonesSCi
- *	"Ajax" function that sends and processes xmlhttp request
+ *	Santa Cruz City, sets address, APN, zoning and calls db for zone info
  *	@param muni is minicipality in db
- *	@param zone is zoning designation for call to db
- *	@param zone is zoning designation for call to db
+ *	@param returnedList contains zone for db search
  */
 function getZonesSCi(muni, returnedList) {
+  try {
 	var features = returnedList['features']['0']['attributes'];
     consoLog(features);
 	document.getElementById("add_place").innerHTML=features['Address'];
@@ -257,46 +129,20 @@ function getZonesSCi(muni, returnedList) {
     p_apnnd = features['APN']
     var urlz = "http://feasibuild.tk/server.php?command=getZone&muni=" + muni + "&zone=" + nzone ;
 	consoLog("Zone is " + nzone);
-//	getZones(muni, urlz, address, apnnd);
 	sendfunc(muni, urlz, getAPN[muni].siteFunc);
+  }
+  catch(err) {
+	  alert("Cannot find this address, check the street and area");
+  }
 }; // getZonesSCi
 
-/** getZones
- *	"Ajax" function that sends and processes xmlhttp request
- *	@param zone is zoning designation for call to db
+/** updateSiteSCi
+ *	Santa Cruz City? could be general case, as it just sets page data
+ *  to internal database return values.
+ *  sets zoning info into web page
+ *	@param muni is minicipality in db
+ *	@param returnedList contains db search results
  */
-function getZones(muni,urlz, address, apnnd) {
-    var xmlhttp;
-	try {
-	   xmlhttp=new XMLHttpRequest();
-    } catch(e) {
-        xmlhttp = false;
-        consoLog(e);
-    }
-	if (xmlhttp) {
-        xmlhttp.onreadystatechange=function() {
-		  if (xmlhttp.readyState==4)
-		  {  if ( (xmlhttp.status==200) || (xmlhttp.status==0) )
-            {
-              var returnedList = (xmlhttp.responseText);
-              returnedList = JSON.parse(returnedList);
-              consoLog(returnedList);
-              document.getElementById("fset_place").innerHTML=returnedList['sfront'];
-              document.getElementById("rset_place").innerHTML=returnedList['srear'];
-              document.getElementById("sset_place").innerHTML=returnedList['s1side'];
-              s1side = returnedList['s1side'];
-			  document.getElementById("mbuild_place").innerHTML=returnedList['maxbuild'];
-			  document.getElementById("mheight_place").innerHTML=returnedList['pheight'];
-			  document.getElementById("mstories_place").innerHTML=returnedList['pstories'];
-			  updateMap(address,apnnd);
-			}
-		  }
-		};
-	}
-	xmlhttp.open("GET",urlz, true);
-	xmlhttp.send(null);
-}; // getZones
-
 function updateSiteSCi(muni, returnedList) {
 
 	consoLog(returnedList);
@@ -308,12 +154,17 @@ function updateSiteSCi(muni, returnedList) {
 	document.getElementById("mheight_place").innerHTML=returnedList['pheight'];
 	document.getElementById("mstories_place").innerHTML=returnedList['pstories'];
 
-    p_apnnd = p_apnnd.replace(/-/g, '')
+    p_apnnd = p_apnnd.replace(/-/g, ''); // in case it has dashes in it.
 	urlz = "https://gis.co.santa-cruz.ca.us/sccgis/rest/services/OpenData_Build_Single/MapServer/145/query?where=APNNODASH%20%3D%20%27" + p_apnnd + "%27&outFields=GP_LANDUSE&outSR=4326&f=json"
+	// urlz has santa cruz county gis data
 	sendfunc(muni, urlz, getAPN[muni].polyFunc);
-//	updateMap(p_address,p_apnnd);
 } // updateSiteSCi
 
+/** updatePolySCi
+ *	Santa Cruz City / County data for boundary polygon
+ *	@param muni is minicipality in db
+ *	@param returnedList contains gis search results
+ */
 function updatePolySCi(muni, returnedList) {
 
     var features = returnedList['features']['0']['geometry']['rings']['0'];
@@ -321,29 +172,39 @@ function updatePolySCi(muni, returnedList) {
 	var fieldCoords = [];
 	var arrayLength = features.length;
 	var property1 = [] ;
+	// builds polygon to send to "buffer" which shrinks the poly
 	for (var i = 0; i < arrayLength; i++) {
 		consoLog("1=" + features[i][1] + " 0= " + features[i][0]);
 		fieldCoords.push(new google.maps.LatLng(features[i][1], features[i][0]));
+		// also pushes into a poly for the map at the same time
 		property1.push(new Vector2(features[i][1], features[i][0]));
 	}
 
-  // Construct the polygon.
-  addPoly2Map(fieldCoords, cropField, '#14EEFE');
-//		New smaller polygon goes here
+  // Add the polygon to map
+	addPoly2Map(fieldCoords, cropField, '#14EEFE');
+//	New smaller polygon goes here
 	fieldCoords = [];
+//	Call inflatePolygon with feet to latlng conversion number
 	var fieldCoords2 = inflatePolygon(property1, s1side * -2.74319999583e-6); // 10 feet
 	arrayLength = fieldCoords2.length;
 	for (var i = 0; i < arrayLength; i++) {
 		consoLog("X =" + fieldCoords2[i].x + " Y = " + fieldCoords2[i].y);
 		fieldCoords.push(new google.maps.LatLng(fieldCoords2[i].x.toString(),
 			fieldCoords2[i].y.toString()));
+		// also pushes into a poly for the map at the same time
 	}
-
+  // Add the shrunk polygon to map
     addPoly2Map(fieldCoords, reducedPoly, '#ec494c');
-	updateMap(p_address,p_apnnd);
+	updateMap(p_address,p_apnnd);  // last step is to recenter, add marker
 } // updatePolySCi
 
-function addPoly2Map(fieldCoords, cropfield, color, ) {
+/** addPoly2Map
+ *	puts polygon in fieldCoords onto _map
+ *	@param fieldCoords is polygon to add
+ *	@param cropfield is google maps polygon
+ *  @param color - of polygon
+ */
+function addPoly2Map(fieldCoords, cropfield, color ) {
   // Construct the polygon.
 	if (typeof cropfield !== 'undefined') { cropfield.setMap(null); }
   	cropfield = new google.maps.Polygon({
@@ -361,27 +222,31 @@ function addPoly2Map(fieldCoords, cropfield, color, ) {
 } // addPoly2Map
 
 /** getAPNSCo
- *	"Ajax" function that sends and processes xmlhttp request
+ *	Santa Cruz County to get zoning info for getZoneSCo
  *	@param muni is minicipality in db
- *	@param zone is zoning designation for call to db
- *	@param zone is zoning designation for call to db
+ *	@param returned List has real address data from previous call,
+ *  needed for zoning info call (because it must be exact)
  */
 function getAPNSCo(muni, returnedList) {
+  try {
     consoLog(returnedList);
 	var features = returnedList['candidates']['0']['attributes'];
     consoLog(features);
-    p_address = features['House'] + " " + features['PreDir'] + " " + features['StreetName'] + features['SufType'];
+    p_address = features['House'] + " " + features['PreDir'] + " " + features['StreetName'] + " " + features['SufType'];
 	document.getElementById("add_place").innerHTML=p_address;
-    var urlz = "https://gis.co.santa-cruz.ca.us/sccgis/rest/services/OpenData_Build_Single/MapServer/145/query?where=SITEADD%20LIKE%20UPPER%28%20%272376%20N%20RODEO%20GULCH%20RD%27%29&outFields=APNNODASH,SQUAREFT,SITEADD,SITEADD2,ZONING,NAME&outSR=4326&f=json" ;
-//	consoLog("Zone is " + nzone);
+    var urlz = "https://gis.co.santa-cruz.ca.us/sccgis/rest/services/OpenData_Build_Single/MapServer/145/query?where=SITEADD%20LIKE%20UPPER%28%20%27" + encodeURI(p_address) + "%27%29&outFields=APNNODASH,SQUAREFT,SITEADD,SITEADD2,ZONING,NAME&outSR=4326&f=json" ;
 	sendfunc(muni, urlz, getAPN[muni].zoneFunc);
+  }
+  catch(err) {
+	  alert("Cannot find this address, check the street and area");
+  }
 }; // getAPNSCo
 
 /** getZonesSCo
- *	"Ajax" function that sends and processes xmlhttp request
+ *	Handles zoning set up info for Santa Cruz County,
+ *  calls county gis for polygon data
  *	@param muni is minicipality in db
- *	@param zone is zoning designation for call to db
- *	@param zone is zoning designation for call to db
+ *	@param returnedList is object with basic plot data
  */
 function getZonesSCo(muni, returnedList) {
     consoLog(returnedList);
@@ -395,7 +260,6 @@ function getZonesSCo(muni, returnedList) {
     p_apnnd = features['APNNODASH']
     var urlz = "http://feasibuild.tk/server.php?command=getZone&muni=" + muni + "&zone=" + nzone ;
 	consoLog("Zone is " + nzone);
-//	getZones(muni, urlz, address, apnnd);
 	sendfunc(muni, urlz, getAPN[muni].siteFunc);
 }; // getZonesSCo
 
