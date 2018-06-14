@@ -9,6 +9,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
  
 var p_address ; // global variable for send functions
 var p_apnnd ; // global variable for send functions
+var cropField ;   // global polygon
+var reducedPoly ; // global polygon
 
 /** Object for functions for getting apn and zoning
  *  index is district
@@ -88,7 +90,8 @@ function sendfunc(muni, address, nextCall) {
                   size: new google.maps.Size(150,50)
                 });
 */
-            var marker = new google.maps.Marker({
+			if (typeof markerMap !== 'undefined') { markerMap.setMap(null); }
+            var markerMap = new google.maps.Marker({
                 position: results[0].geometry.location,
                 map: _map, 
                 title:p_address
@@ -97,8 +100,8 @@ function sendfunc(muni, address, nextCall) {
             google.maps.event.addListener(marker, 'click', function() {
                 infowindow.open(_map,marker);
             });
-
 */
+			markerMap.setMap(_map);
           } else {
             alert("No results found");
           }
@@ -179,9 +182,14 @@ function updatePolySCi(muni, returnedList) {
 		// also pushes into a poly for the map at the same time
 		property1.push(new Vector2(features[i][1], features[i][0]));
 	}
-
+ 
   // Add the polygon to map
-	addPoly2Map(fieldCoords, cropField, '#14EEFE');
+	cropField = addPoly2Map(fieldCoords, cropField, '#14EEFE');
+  // resets the map to the proper size for this property
+	var bounds = new google.maps.LatLngBounds();
+    cropField.getPath().forEach(function (element, index) { bounds.extend(element); });
+    _map.fitBounds(bounds);
+
 //	New smaller polygon goes here
 	fieldCoords = [];
 //	Call inflatePolygon with feet to latlng conversion number
@@ -194,8 +202,10 @@ function updatePolySCi(muni, returnedList) {
 		// also pushes into a poly for the map at the same time
 	}
   // Add the shrunk polygon to map
-    addPoly2Map(fieldCoords, reducedPoly, '#ec494c');
+    reducedPoly = addPoly2Map(fieldCoords, reducedPoly, '#ec494c');
 	updateMap(p_address,p_apnnd);  // last step is to recenter, add marker
+	
+
 } // updatePolySCi
 
 /** addPoly2Map
@@ -207,6 +217,7 @@ function updatePolySCi(muni, returnedList) {
 function addPoly2Map(fieldCoords, cropfield, color ) {
   // Construct the polygon.
 	if (typeof cropfield !== 'undefined') { cropfield.setMap(null); }
+	consoLog("cropfield is " + typeof cropfield);
   	cropfield = new google.maps.Polygon({
 	    paths: fieldCoords,
 	   	strokeColor: color,
@@ -219,6 +230,7 @@ function addPoly2Map(fieldCoords, cropfield, color ) {
 	    geodesic: true
 	});
 	cropfield.setMap(_map);
+	return cropfield;
 } // addPoly2Map
 
 /** getAPNSCo

@@ -1,4 +1,4 @@
-#Mon Jun 11 13:58:58 PDT 2018
+#Thu Jun 14 10:03:44 PDT 2018
 base.0=/home/keith/Development/phonegap/archplan/platforms/android/app/build/intermediates/transforms/dexMerger/debug/0
 renamed.0=classes.dex
 file.0=/home/keith/Development/phonegap/archplan/platforms/android/app/build/intermediates/transforms/dexMerger/debug/0/classes.dex

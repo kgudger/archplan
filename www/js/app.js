@@ -17,6 +17,7 @@ var options = {			// GPS options
 var geocoder;
 var mapCanvas;
 var _map ;
+var markerMap;
 var s1side = 0 ;
 var debug = true;
 
@@ -98,12 +99,12 @@ function showMap() {
     	    mapTypeId: google.maps.MapTypeId.roadmap
     	};
         _map = new google.maps.Map(mapCanvas, mapOptions);
-		var marker = new google.maps.Marker({
+		markerMap = new google.maps.Marker({
 			position: latlngp,
 			map: _map,
 			title: 'Current Position'
 		});
-		marker.setMap(_map);
+		markerMap.setMap(_map);
 } // showMap
 
 /** vectorCoordinates2JTS 
