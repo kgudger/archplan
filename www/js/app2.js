@@ -22,21 +22,30 @@ var getAPN = {
 		sendFunc : function(muni,address) { sendfunc(muni,
 			"https://vw8.cityofsantacruz.com/server/rest/services/search/MapServer/0/query?f=json&where=Upper(Address)%20LIKE%20Upper(%27%25" + address + "%25%27)&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=Address%2CSiteAdd2%2CAPN%2CUseCode%2CParcelSizeSqFt%2CCOASTALZ%2CZoning1&outSR=102643",
 			this.zoneFunc); },
-		zoneFunc : function(muni,returnedList) { getZonesSCi(muni, returnedList); },
-		siteFunc : function(muni,returnedList) { updateSiteSCi(muni, returnedList); },
-		polyFunc : function(muni,returnedList) { updatePolySCi(muni, returnedList); }
+		zoneFunc : getZonesSCi,
+		siteFunc : updateSiteSCi,
+		polyFunc : updatePolySCi
 	},
 	CountyofSantaCruz  : { 
 		sendFunc : function(muni,address) { sendfunc(muni,
 			"http://gis.co.santa-cruz.ca.us/sccgis/rest/services/GISwebLocator/GeocodeServer/findAddressCandidates?Single%20Line%20Input=" + address + "&f=json&outFields=*",
 			this.apiFunc); },
-		apiFunc  : function(muni,returnedList) { getAPNSCo(muni, returnedList); },
-		zoneFunc : function(muni,returnedList) { getZonesSCo(muni, returnedList); },
-		siteFunc : function(muni,returnedList) { updateSiteSCi(muni, returnedList); },
-		polyFunc : function(muni,returnedList) { updatePolySCi(muni, returnedList); }
+		apiFunc  : getAPNSCo,
+		zoneFunc : getZonesSCo,
+		siteFunc : updateSiteSCi,
+		polyFunc : updatePolySCi
 	},
 
-	CityofCapitola     : function(muni,address) { sendfunc(muni,address); },
+	CityofCapitola     : {
+		sendFunc : function(muni,address) { sendfunc(muni,
+			"http://gis.co.santa-cruz.ca.us/sccgis/rest/services/GISwebLocator/GeocodeServer/findAddressCandidates?Single%20Line%20Input=" + address + "&f=json&outFields=*",
+			this.apiFunc); },
+		apiFunc  : getAPNSCo,
+		zoneFunc : getZonesSCo,
+		siteFunc : updateSiteSCi,
+		polyFunc : updatePolySCi
+	},
+
 	CityofWatsonville  : function(muni,address) { sendfunc(muni,address); },
 	CityofScottsValley : function(muni,address) { sendfunc(muni,address); }
 };
@@ -182,7 +191,10 @@ function updatePolySCi(muni, returnedList) {
 		// also pushes into a poly for the map at the same time
 		property1.push(new Vector2(features[i][1], features[i][0]));
 	}
- 
+    var point = features[0][1] + "," + features[0][0];
+    consoLog("Point is " + point);
+    sendRoadAPI(point, fieldCoords);
+    
   // Add the polygon to map
 	cropField = addPoly2Map(fieldCoords, cropField, '#14EEFE');
   // resets the map to the proper size for this property
@@ -262,16 +274,121 @@ function getAPNSCo(muni, returnedList) {
  */
 function getZonesSCo(muni, returnedList) {
     consoLog(returnedList);
-	var features = returnedList['features']['0']['attributes'];
-	document.getElementById("apn_place").innerHTML=features['APNNODASH'];
-	document.getElementById("zone_place").innerHTML=features['ZONING'];
-	document.getElementById("lot_place").innerHTML=features['SQUAREFT']+ "Sq. Ft.";
-    var zone = features['ZONING'];
-    zone = zone.split(" ");
-    var nzone = zone[0];
-    p_apnnd = features['APNNODASH']
+	var nzone = "";
+	if (typeof returnedList['features']['0'] !== 'undefined') {
+		var features = returnedList['features']['0']['attributes'];
+		document.getElementById("apn_place").innerHTML=features['APNNODASH'];
+		document.getElementById("zone_place").innerHTML=features['ZONING'];
+		document.getElementById("lot_place").innerHTML=features['SQUAREFT']+ "Sq. Ft.";
+		var zone = features['ZONING'];
+		zone = zone.split(" ");
+		nzone = zone[0];
+		p_apnnd = features['APNNODASH']
+	}
     var urlz = "http://feasibuild.tk/server.php?command=getZone&muni=" + muni + "&zone=" + nzone ;
 	consoLog("Zone is " + nzone);
 	sendfunc(muni, urlz, getAPN[muni].siteFunc);
 }; // getZonesSCo
 
+/** sendRoadAPI
+ *	Calls Roads API to find centerpoint of closest road.
+ *	@param point is a "latitude,longitude" to find the nearest road to
+ */
+function sendRoadAPI(point, fieldCoords) {
+    var xmlhttp;
+	try {
+	   xmlhttp=new XMLHttpRequest();
+    } catch(e) {
+        xmlhttp = false;
+        consoLog(e);
+    }
+	if (xmlhttp) {
+        xmlhttp.onreadystatechange=function() {
+		  if (xmlhttp.readyState==4)
+		  {  if ( (xmlhttp.status==200) || (xmlhttp.status==0) )
+            {
+              returnedList = (xmlhttp.responseText);
+              returnedList = JSON.parse(returnedList);
+              consoLog(returnedList);
+			  var latlngp = new google.maps.LatLng(
+				returnedList['snappedPoints'][0]['location']['latitude'],
+				returnedList['snappedPoints'][0]['location']['longitude']); // using global variable now
+              var p_marker = new google.maps.Marker({
+                position: latlngp,
+                map: _map, 
+                title:"Road"
+              }); 
+			  markerMap.setMap(_map);
+			  var distBtwn = [];
+			  for ( var i = 0; i < fieldCoords.length; i++ ) {
+				console.log(google.maps.geometry.spherical.computeDistanceBetween(
+					latlngp, fieldCoords[i]));
+				distBtwn[i] = google.maps.geometry.spherical.computeDistanceBetween(
+					latlngp, fieldCoords[i]);
+			  }
+			  var least = 1000;  // just a guess as to how small they'll be
+			  var least_i = 0;
+			  var n_least = 2000 ;
+			  var n_least_i = 0;
+			  for (var i = 0; i < distBtwn.length; i++ ) { // find closest to road
+				  if (distBtwn[i] < n_least) {				// and next closest
+					  if (distBtwn[i] < least) {
+						  n_least = least;
+						  n_least_i = least_i;
+						  least = distBtwn[i];
+						  least_i = i ;
+					  } else if ( distBtwn[i] > least ) {
+						  n_least = distBtwn[i];
+						  n_least_i = i;
+					  }
+					  consoLog("index = " + i);
+				  }
+			  }
+			  consoLog("smallest is " + least) ;
+			  consoLog("next smallest is " + n_least) ;
+			  consoLog("smallest index is " + least_i) ;
+			  consoLog("next smallest index is " + n_least_i) ;
+			  // find colinear points
+			  consoLog("Smallest distance point is " + fieldCoords[least_i]);
+			  if ( fieldCoords[least_i].lat() > 
+					fieldCoords[n_least_i].lat() ) { 
+				  // to get slopes that have the same sign? not sure
+				var temp = least_i ;
+				least_i = n_least_i ;
+				n_least_i = temp ;  // swap indicies
+			  } // swap points
+			  var startPoint = fieldCoords[least_i] ;
+			  var nextPoint  = fieldCoords[n_least_i] ;
+			  var slope = (nextPoint.lat() - startPoint.lat()) /
+							(nextPoint.lng() - startPoint.lng()) ;
+			  var polyPoints = [] ;
+			  polyPoints.push(startPoint);
+			  var pslope = Math.abs(slope*.1); // 10% slop?
+			  for ( var i = 0; i < fieldCoords.length; i++ ) {
+				  if ( i!= least_i ) { // it's not the starting point
+					  var numerator = (fieldCoords[i].lat() - startPoint.lat()) ;
+					  var denomintr = (fieldCoords[i].lng() - startPoint.lng()) ;
+					  var nslope = numerator / denomintr ;
+					  if ( (nslope > (slope - pslope)) && // 10% slop?
+							(nslope < (slope + pslope)) ) {
+						polyPoints.push(fieldCoords[i]);
+					  }
+				  }
+			  }
+			  var streetPath = new google.maps.Polyline({
+					path: polyPoints,
+					geodesic: true,
+					strokeColor: '#000000',
+					strokeOpacity: 1.0,
+					strokeWeight: 2
+			  });
+			  streetPath.setMap(_map);
+
+//              nextCall(muni,returnedList);
+			}
+		  }
+		};
+	}
+	xmlhttp.open("GET", "https://roads.googleapis.com/v1/nearestRoads?points=" + point + "&key=AIzaSyAUAzdEbG4JtsNuNhq30xqqGpV7QRW7_hE", true);
+	xmlhttp.send(null);
+}; // sendfunc
