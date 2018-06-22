@@ -332,6 +332,10 @@ function findRoadEdge(muni, returnedList) {
 	var least_i = 0;
 	var n_least = 2000 ;
 	var n_least_i = 0;
+	var most = -1;  // just a guess as to how small they'll be
+	var most_i = 0;
+	var n_most = 0 ;
+	var n_most_i = 0;
 	for (var i = 0; i < distBtwn.length; i++ ) { // find closest to road
 	  if (distBtwn[i] < n_least) {				// and next closest
 		if (distBtwn[i] < least) {
@@ -343,15 +347,28 @@ function findRoadEdge(muni, returnedList) {
 		  n_least = distBtwn[i];
 		  n_least_i = i;
 		}
-		consoLog("index = " + i);
+	  }
+	  if (distBtwn[i] > n_most) {	// 
+		if (distBtwn[i] > most) { // looking for largest 2
+		  n_most = most;
+		  n_most_i = most_i;
+		  most = distBtwn[i];
+		  most_i = i ;
+		} else if ( distBtwn[i] < most ) {
+		  n_most = distBtwn[i];
+		  n_most_i = i;
+		}
 	  }
 	}
 	consoLog("smallest is " + least) ;
 	consoLog("next smallest is " + n_least) ;
 	consoLog("smallest index is " + least_i) ;
 	consoLog("next smallest index is " + n_least_i) ;
+	consoLog("largest is " + most) ;
+	consoLog("next largest is " + n_most) ;
+	consoLog("largest index is " + most_i) ;
+	consoLog("next largest index is " + n_most_i) ;
 	// find colinear points
-	consoLog("Smallest distance point is " + fieldCoords[least_i]);
 	if ( fieldCoords[least_i].lat() > 
 		fieldCoords[n_least_i].lat() ) { 
 	  // to get slopes that have the same sign? not sure
@@ -361,6 +378,13 @@ function findRoadEdge(muni, returnedList) {
 	} // swap points
 	var startPoint = fieldCoords[least_i] ;
 	var nextPoint  = fieldCoords[n_least_i] ;
+	findColinear(startPoint, nextPoint , fieldCoords, least_i);
+	startPoint = fieldCoords[most_i] ;
+	nextPoint  = fieldCoords[n_most_i] ;
+	findColinear(startPoint, nextPoint , fieldCoords, most_i);
+}; // findRoadEdge
+
+function findColinear(startPoint, nextPoint , fieldCoords, least_i) {
 	var slope = (nextPoint.lat() - startPoint.lat()) /
 				(nextPoint.lng() - startPoint.lng()) ;
 	var polyPoints = [] ;
@@ -385,5 +409,4 @@ function findRoadEdge(muni, returnedList) {
 		strokeWeight: 2
 	});
 	streetPath.setMap(_map);
-
-}; // findRoadEdge
+} // findColinear
