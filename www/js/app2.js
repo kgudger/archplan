@@ -315,27 +315,16 @@ function findRoadEdge(muni, returnedList) {
 	var latlngp = new google.maps.LatLng(
 	returnedList['snappedPoints'][0]['location']['latitude'],
 	returnedList['snappedPoints'][0]['location']['longitude']); // using global variable now
-/*    var p_marker = new google.maps.Marker({
-        position: latlngp,
-        map: _map, 
-        title:"Road"
-    }); */ 
-	markerMap.setMap(_map);
 	var distBtwn = [];
 	for ( var i = 0; i < fieldCoords.length; i++ ) {
-		console.log(google.maps.geometry.spherical.computeDistanceBetween(
-			latlngp, fieldCoords[i]));
 		distBtwn[i] = google.maps.geometry.spherical.computeDistanceBetween(
 			latlngp, fieldCoords[i]);
+		console.log(distBtwn[i]);
 	}
 	var least = 1000;  // just a guess as to how small they'll be
 	var least_i = 0;
 	var n_least = 2000 ;
 	var n_least_i = 0;
-	var most = -1;  // just a guess as to how small they'll be
-	var most_i = 0;
-	var n_most = 0 ;
-	var n_most_i = 0;
 	for (var i = 0; i < distBtwn.length; i++ ) { // find closest to road
 	  if (distBtwn[i] < n_least) {				// and next closest
 		if (distBtwn[i] < least) {
@@ -348,22 +337,41 @@ function findRoadEdge(muni, returnedList) {
 		  n_least_i = i;
 		}
 	  }
-	  if (distBtwn[i] > n_most) {	// 
-		if (distBtwn[i] > most) { // looking for largest 2
-		  n_most = most;
-		  n_most_i = most_i;
-		  most = distBtwn[i];
-		  most_i = i ;
-		} else if ( distBtwn[i] < most ) {
-		  n_most = distBtwn[i];
-		  n_most_i = i;
-		}
-	  }
 	}
 	consoLog("smallest is " + least) ;
 	consoLog("next smallest is " + n_least) ;
 	consoLog("smallest index is " + least_i) ;
 	consoLog("next smallest index is " + n_least_i) ;
+// now find farthest poly from road
+	latlngp = new google.maps.LatLng(
+		fieldCoords[least_i].lat(),
+		fieldCoords[least_i].lng()); // using closest point to road
+	var latlngp2 = new google.maps.LatLng(
+		fieldCoords[n_least_i].lat(),
+		fieldCoords[n_least_i].lng()); // using closest point to road
+	var distBtwn = [];
+	for ( var i = 0; i < fieldCoords.length; i++ ) {
+		distBtwn[i] = google.maps.geometry.spherical.computeDistanceBetween(
+			latlngp, fieldCoords[i]);
+		distBtwn[i] += google.maps.geometry.spherical.computeDistanceBetween(
+			latlngp2, fieldCoords[i]); // effective average of 2 points
+		console.log(distBtwn[i]);
+	} // distance calculation
+
+	var most = Math.max.apply(null,distBtwn); // get max first, solves "almost" problem
+	var most_i = 0;
+	var n_most = 0 ;
+	var n_most_i = 0;
+	for (var i = 0; i < distBtwn.length; i++ ) { // find 2nd farthest from road
+	  if (distBtwn[i] > n_most) {	// 
+		if (distBtwn[i] == most ) { // looking for largest 2
+		  most_i = i ;
+		} else if ( distBtwn[i] < most -1 ) { // reject similar points
+		  n_most = distBtwn[i];
+		  n_most_i = i;
+		}
+	  }
+	}
 	consoLog("largest is " + most) ;
 	consoLog("next largest is " + n_most) ;
 	consoLog("largest index is " + most_i) ;
@@ -381,6 +389,18 @@ function findRoadEdge(muni, returnedList) {
 	findColinear(startPoint, nextPoint , fieldCoords, least_i);
 	startPoint = fieldCoords[most_i] ;
 	nextPoint  = fieldCoords[n_most_i] ;
+/*    var mMap1 = new google.maps.Marker({
+        position: startPoint,
+        map: _map, 
+        title:"Most"
+    }); 
+	mMap1.setMap(_map);
+    var mMap2 = new google.maps.Marker({
+        position: nextPoint,
+        map: _map, 
+        title:"Next most"
+    }); 
+	mMap2.setMap(_map);*/
 	findColinear(startPoint, nextPoint , fieldCoords, most_i);
 }; // findRoadEdge
 
