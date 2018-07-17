@@ -12,6 +12,7 @@ var p_apnnd ; // global variable for send functions
 var cropField ;   // global polygon
 var reducedPoly ; // global polygon
 var fieldCoords = []; // global polygon of latlngs
+var MasterURL = "35.227.176.71";
 
 /** Object for functions for getting apn and zoning
  *  index is district
@@ -147,7 +148,7 @@ function getZonesSCi(muni, returnedList) {
     var nzone = zone[0];
     p_address = features['Address'] + " " + features['SiteAdd2'];
     p_apnnd = features['APN']
-    var urlz = "http://feasibuild.tk/server.php?command=getZone&muni=" + muni + "&zone=" + nzone ;
+    var urlz = "http://" + MasterURL + "/server.php?command=getZone&muni=" + muni + "&zone=" + nzone ;
 	consoLog("Zone is " + nzone);
 	sendfunc(muni, urlz, getAPN[muni].siteFunc);
   }
@@ -301,7 +302,7 @@ function getZonesSCo(muni, returnedList) {
 		nzone = zone[0];
 		p_apnnd = features['APNNODASH']
 	}
-    var urlz = "http://feasibuild.tk/server.php?command=getZone&muni=" + muni + "&zone=" + nzone ;
+    var urlz = "http://"+ MasterURL + "/server.php?command=getZone&muni=" + muni + "&zone=" + nzone ;
 	consoLog("Zone is " + nzone);
 	sendfunc(muni, urlz, getAPN[muni].siteFunc);
 }; // getZonesSCo
@@ -404,20 +405,30 @@ function findRoadEdge(muni, returnedList) {
 	findColinear(startPoint, nextPoint , fieldCoords, most_i);
 }; // findRoadEdge
 
+/** findColinear
+ *	Finds all points in polygon with similar slope
+ *  Tries to find all points on a particular side.
+ *	@param startPoint is the initial point to start from
+ *	@param nextPoint is the next point used to calculate the slope
+ *	@param least_i is the index of the start point so it's excluded.
+ */
 function findColinear(startPoint, nextPoint , fieldCoords, least_i) {
-	var slope = (nextPoint.lat() - startPoint.lat()) /
-				(nextPoint.lng() - startPoint.lng()) ;
+	var slope = Math.abs((nextPoint.lat() - startPoint.lat()) /
+						(nextPoint.lng() - startPoint.lng())) ;
+						// slope is OK if positive or negative
+	consoLog("Initial slope is " + slope) ;
 	var polyPoints = [] ;
 	polyPoints.push(startPoint);
-	var pslope = Math.abs(slope*.1); // 10% slop?
+	var pslope = slope*.3; // 30% slop?
 	for ( var i = 0; i < fieldCoords.length; i++ ) {
 	  if ( i!= least_i ) { // it's not the starting point
 		  var numerator = (fieldCoords[i].lat() - startPoint.lat()) ;
 		  var denomintr = (fieldCoords[i].lng() - startPoint.lng()) ;
-		  var nslope = numerator / denomintr ;
+		  var nslope = Math.abs(numerator / denomintr) ;
 		  if ( (nslope > (slope - pslope)) && // 10% slop?
 				(nslope < (slope + pslope)) ) {
 			polyPoints.push(fieldCoords[i]);
+
 		  }
 	  }
 	}
